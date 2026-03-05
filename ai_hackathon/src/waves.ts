@@ -43,40 +43,52 @@ export function getWaveConfig(waveNumber: number): WaveSpawnConfig {
     description = 'Pulse drones detected!'
   } else if (waveNumber === 3) {
     spawns = [
-      { type: 'swarm', count: 3 },
-      { type: 'scout', count: 1 },
+      { type: 'swarm', count: 2 },
+      { type: 'shield', count: 1 },
     ]
-    description = 'Swarm incoming! Watch for small drones!'
+    description = 'Elite Shield Drone detected!'
   } else if (waveNumber === 4) {
     spawns = [
-      { type: 'pulse', count: 3 },
-      { type: 'scout', count: 2 },
+      { type: 'pulse', count: 2 },
+      { type: 'phase', count: 1 },
+      { type: 'scout', count: 1 },
     ]
-    description = 'Heavy pulse wave!'
+    description = 'Phase Drone incoming - watch for evasion!'
   } else if (waveNumber === 5) {
     spawns = [
-      { type: 'scout', count: 2 },
-      { type: 'pulse', count: 2 },
+      { type: 'overclocked', count: 2 },
+      { type: 'pulse', count: 1 },
       { type: 'swarm', count: 2 },
     ]
-    description = 'Mixed enemy wave!'
+    description = 'Overclocked units detected!'
+  } else if (waveNumber === 6) {
+    spawns = [
+      { type: 'regenerating', count: 2 },
+      { type: 'shield', count: 1 },
+      { type: 'scout', count: 2 },
+    ]
+    description = 'Regenerating enemies - focus fire!'
   } else if (waveNumber <= 10) {
-    // Waves 6-10: Increase difficulty
-    const difficulty = waveNumber - 5
+    // Waves 7-10: Mixed elite waves
+    const difficulty = waveNumber - 6
     spawns = [
-      { type: 'scout', count: 2 + difficulty },
-      { type: 'pulse', count: 1 + difficulty },
-      { type: 'swarm', count: difficulty },
+      { type: 'shield', count: 1 + Math.floor(difficulty / 2) },
+      { type: 'phase', count: 1 },
+      { type: 'overclocked', count: 1 + difficulty },
+      { type: 'regenerating', count: 1 },
+      { type: 'pulse', count: difficulty },
     ]
-    description = `Heavy combat approaching! (Wave ${waveNumber})`
+    description = `Elite Squad Approaching! (Wave ${waveNumber})`
   } else {
-    // Waves 11+: Intense waves
+    // Waves 11+: Maximum difficulty
     spawns = [
-      { type: 'scout', count: 5 },
-      { type: 'pulse', count: 4 },
-      { type: 'swarm', count: 3 },
+      { type: 'shield', count: 3 },
+      { type: 'phase', count: 2 },
+      { type: 'overclocked', count: 3 },
+      { type: 'regenerating', count: 2 },
+      { type: 'pulse', count: 2 },
     ]
-    description = `EXTREME THREAT LEVEL! (Wave ${waveNumber})`
+    description = `CRITICAL THREAT LEVEL! (Wave ${waveNumber})`
   }
 
   const difficultyMultiplier = calculateDifficultyMultiplier(waveNumber)

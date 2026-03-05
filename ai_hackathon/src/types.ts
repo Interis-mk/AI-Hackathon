@@ -33,6 +33,11 @@ export interface EnemyTemplate {
     color: string;
     scale: number;
   };
+  modifiers?: {
+    defenseMultiplier?: number; // Shield drone damage reduction
+    evasion?: number; // Phase drone evasion chance
+    regeneration?: number; // Regenerating drone HP/sec
+  };
 }
 
 export interface Enemy {

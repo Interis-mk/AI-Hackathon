@@ -47,6 +47,68 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
       scale: 0.6,
     },
   },
+
+  // Phase 2: Elite Enemy Types
+  shield: {
+    id: 'shield',
+    name: 'Shield Drone',
+    health: 40,
+    speed: 6,
+    damage: 10,
+    xpReward: 20,
+    visuals: {
+      color: '#0088ff', // Blue
+      scale: 1.2,
+    },
+    modifiers: {
+      defenseMultiplier: 0.7, // Takes 30% less damage
+    },
+  },
+
+  phase: {
+    id: 'phase',
+    name: 'Phase Drone',
+    health: 25,
+    speed: 14,
+    damage: 7,
+    xpReward: 18,
+    visuals: {
+      color: '#ff88ff', // Light purple
+      scale: 0.9,
+    },
+    modifiers: {
+      evasion: 0.3, // 30% chance to evade attacks
+    },
+  },
+
+  overclocked: {
+    id: 'overclocked',
+    name: 'Overclocked Drone',
+    health: 35,
+    speed: 10,
+    damage: 12,
+    xpReward: 22,
+    visuals: {
+      color: '#ff4400', // Orange-red
+      scale: 1.1,
+    },
+  },
+
+  regenerating: {
+    id: 'regenerating',
+    name: 'Regenerating Drone',
+    health: 30,
+    speed: 8,
+    damage: 8,
+    xpReward: 19,
+    visuals: {
+      color: '#44ff44', // Bright green
+      scale: 1.0,
+    },
+    modifiers: {
+      regeneration: 2, // 2 HP per second
+    },
+  },
 }
 
 /**
@@ -91,10 +153,42 @@ export function applyDifficultyMultiplier(enemy: Enemy, waveNumber: number): voi
 /**
  * Damage an enemy
  * Returns true if enemy is defeated (health <= 0)
+ * Handles special modifiers like shield defense and phase evasion
  */
 export function damageEnemy(enemy: Enemy, damage: number): boolean {
+  const template = ENEMY_TYPES[enemy.type]
+
+  // Phase Drone - Evasion chance
+  if (template?.modifiers?.evasion) {
+    if (Math.random() < template.modifiers.evasion) {
+      // Evaded the attack
+      return false
+    }
+  }
+
+  // Shield Drone - Damage reduction
+  if (template?.modifiers?.defenseMultiplier) {
+    damage *= template.modifiers.defenseMultiplier
+  }
+
   enemy.health = Math.max(0, enemy.health - damage)
   return enemy.health <= 0
+}
+
+/**
+ * Update enemy state (called every frame)
+ * Handles regeneration and other time-based effects
+ */
+export function updateEnemy(enemy: Enemy, deltaTime: number): void {
+  const template = ENEMY_TYPES[enemy.type]
+
+  // Regenerating Drone - Health regeneration
+  if (template?.modifiers?.regeneration && enemy.health > 0) {
+    enemy.health = Math.min(
+      enemy.maxHealth,
+      enemy.health + template.modifiers.regeneration * deltaTime
+    )
+  }
 }
 
 /**

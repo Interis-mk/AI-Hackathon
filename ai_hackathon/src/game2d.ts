@@ -22,6 +22,7 @@ import {
   createEnemy,
   applyDifficultyMultiplier,
   damageEnemy,
+  updateEnemy,
   ENEMY_TYPES,
 } from './enemies'
 
@@ -290,6 +291,9 @@ export class GameManager {
     const enemiesToRemove: string[] = []
 
     this.enemies.forEach((enemy) => {
+      // Update enemy state (regeneration, etc.)
+      updateEnemy(enemy, deltaTime)
+
       // Move towards player
       const dx = this.player.position.x - enemy.position.x
       const dy = this.player.position.y - enemy.position.y
@@ -415,6 +419,16 @@ export class GameManager {
       const template = ENEMY_TYPES[enemy.type]
       const color = template?.visuals?.color || '#ff00ff'
       const size = template?.visuals?.scale ? 12 * template.visuals.scale : 12
+
+      // Draw elite enemy glow/aura
+      const eliteTypes = ['shield', 'phase', 'overclocked', 'regenerating']
+      if (eliteTypes.includes(enemy.type)) {
+        // Outer glow
+        this.sceneManager.ctx.shadowBlur = 20
+        this.sceneManager.ctx.shadowColor = color
+        this.sceneManager.drawCircle(enemy.position.x, enemy.position.y, size + 3, color)
+        this.sceneManager.ctx.shadowBlur = 0
+      }
 
       this.sceneManager.drawCircle(enemy.position.x, enemy.position.y, size, color)
       this.sceneManager.drawHealthBar(enemy.position.x, enemy.position.y, enemy.health, enemy.maxHealth, 30)
