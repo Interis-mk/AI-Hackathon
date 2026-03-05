@@ -12,6 +12,7 @@ import {
     Ability,
     Obstacle,
     NavGrid,
+    TerrainPatch,
 } from './types'
 import {
     getCurrentLevel,
@@ -82,6 +83,7 @@ export class GameManager {
     // Navigation / obstacles
     private readonly navCellSize = 80
     private obstacles: Obstacle[] = []
+    private terrainPatches: TerrainPatch[] = []
     private navGrid!: NavGrid
     private enemyPathState: Map<string, {
         waypoints: Array<{ x: number; y: number }>;
@@ -107,11 +109,13 @@ export class GameManager {
         }
 
         this.obstacles = this.createObstacles()
+        this.terrainPatches = this.createTerrainPatches()
         this.navGrid = buildNavGrid(
             this.sceneManager.arenaWidth,
             this.sceneManager.arenaHeight,
             this.navCellSize,
             this.obstacles,
+            this.terrainPatches,
             20
         )
 
@@ -201,6 +205,47 @@ export class GameManager {
         return obstacles.slice(0, 2000)
     }
 
+    private createTerrainPatches(): TerrainPatch[] {
+        const patches: TerrainPatch[] = []
+        let id = 0
+
+        const arenaWidth = this.sceneManager.arenaWidth
+        const arenaHeight = this.sceneManager.arenaHeight
+
+        // Create 20-30 terrain patches across the map
+        const patchCount = 20 + Math.floor(Math.random() * 10)
+
+        for (let i = 0; i < patchCount; i++) {
+            const type = Math.random() < 0.5 ? 'mud' : 'ice'
+            const width = 200 + Math.random() * 400
+            const height = 200 + Math.random() * 400
+            const x = Math.random() * (arenaWidth - width)
+            const y = Math.random() * (arenaHeight - height)
+
+            // Don't spawn near player start
+            const distToPlayer = Math.sqrt((x + width / 2 - 8000) ** 2 + (y + height / 2 - 6000) ** 2)
+            if (distToPlayer < 1000) {
+                continue
+            }
+
+            const speedMultiplier = type === 'mud' ? 0.5 : 1.5
+            const pathfindingCost = type === 'mud' ? 2.0 : 0.8
+
+            patches.push({
+                id: `terrain-${id++}`,
+                x,
+                y,
+                width,
+                height,
+                type,
+                speedMultiplier,
+                pathfindingCost,
+            })
+        }
+
+        return patches
+    }
+
     private collidesWithObstacle(x: number, y: number, radius: number): boolean {
         return this.obstacles.some((o) => {
             const nearestX = Math.max(o.x, Math.min(x, o.x + o.width))
@@ -238,6 +283,16 @@ export class GameManager {
         return 12 * scale
     }
 
+    private getTerrainSpeedMultiplier(x: number, y: number): number {
+        for (const patch of this.terrainPatches) {
+            if (x >= patch.x && x <= patch.x + patch.width &&
+                y >= patch.y && y <= patch.y + patch.height) {
+                return patch.speedMultiplier
+            }
+        }
+        return 1.0
+    }
+
     private updateAutoAim(): void {
         if (!this.autoAimEnabled || this.enemies.size === 0) {
             return
@@ -258,8 +313,9 @@ export class GameManager {
         })
 
         if (nearestEnemy) {
-            const dx = nearestEnemy.position.x - this.player.position.x
-            const dy = nearestEnemy.position.y - this.player.position.y
+            const targetEnemy = nearestEnemy as Enemy
+            const dx = targetEnemy.position.x - this.player.position.x
+            const dy = targetEnemy.position.y - this.player.position.y
             const distance = Math.sqrt(dx * dx + dy * dy)
 
             if (distance > 0) {
@@ -476,7 +532,8 @@ export class GameManager {
             moveX /= len
             moveY /= len
 
-            const moveSpeed = 200
+            const terrainMultiplier = this.getTerrainSpeedMultiplier(this.player.position.x, this.player.position.y)
+            const moveSpeed = 200 * terrainMultiplier
             const newX = this.player.position.x + moveX * moveSpeed * deltaTime
             const newY = this.player.position.y + moveY * moveSpeed * deltaTime
 
@@ -575,8 +632,10 @@ export class GameManager {
                 if (dist < 12) {
                     state.nextIndex++
                 } else if (dist > 0) {
-                    const moveX = (toX / dist) * enemy.speed * deltaTime
-                    const moveY = (toY / dist) * enemy.speed * deltaTime
+                    const terrainMultiplier = this.getTerrainSpeedMultiplier(enemy.position.x, enemy.position.y)
+                    const effectiveSpeed = enemy.speed * terrainMultiplier
+                    const moveX = (toX / dist) * effectiveSpeed * deltaTime
+                    const moveY = (toY / dist) * effectiveSpeed * deltaTime
                     const moved = this.moveWithObstacleCollision(
                         enemy.position.x,
                         enemy.position.y,
@@ -697,6 +756,11 @@ export class GameManager {
 
         this.sceneManager.beginWorldRender()
 
+        // Draw terrain patches first (ground layer)
+        this.terrainPatches.forEach((patch) => {
+            this.sceneManager.drawTerrainPatch(patch)
+        })
+
         this.sceneManager.drawCircle(this.player.position.x, this.player.position.y, 15, '#00ff00')
 
         const dirX = this.player.position.x + this.shootDirection.x * 25
@@ -804,6 +868,18 @@ export class GameManager {
 
     public returnToMenu(): void {
         window.location.reload()
+    }
+
+    public toggleFullscreen(): void {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`)
+            })
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen()
+            }
+        }
     }
 
     private endGame(): void {
@@ -1146,6 +1222,12 @@ export class GameManager {
                 <span class="slot-number">Slot ${i}</span>
                 <span class="slot-ability ${ability ? '' : 'slot-empty'}">${ability ? ability.name : 'Empty'}</span>
             `
+
+            if (ability) {
+                slotButton.setAttribute('data-tooltip', buildAbilityTooltip(ability))
+            } else {
+                slotButton.removeAttribute('data-tooltip')
+            }
         }
     }
 
@@ -1158,6 +1240,12 @@ export class GameManager {
                 ? `<span>${this.mergeSlot1.name}</span>`
                 : '<span>Select Ability 1</span>'
             slot1.className = `merge-slot${this.mergeSlot1 ? ' selected' : ''}${this.activeSelectSlot === 1 ? ' active' : ''}`
+
+            if (this.mergeSlot1) {
+                slot1.setAttribute('data-tooltip', buildAbilityTooltip(this.mergeSlot1))
+            } else {
+                slot1.removeAttribute('data-tooltip')
+            }
         }
 
         if (slot2) {
@@ -1165,6 +1253,12 @@ export class GameManager {
                 ? `<span>${this.mergeSlot2.name}</span>`
                 : '<span>Select Ability 2</span>'
             slot2.className = `merge-slot${this.mergeSlot2 ? ' selected' : ''}${this.activeSelectSlot === 2 ? ' active' : ''}`
+
+            if (this.mergeSlot2) {
+                slot2.setAttribute('data-tooltip', buildAbilityTooltip(this.mergeSlot2))
+            } else {
+                slot2.removeAttribute('data-tooltip')
+            }
         }
     }
 

@@ -117,6 +117,19 @@ export interface Obstacle {
   height: number;
 }
 
+export type TerrainType = 'normal' | 'mud' | 'ice';
+
+export interface TerrainPatch {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  type: TerrainType;
+  speedMultiplier: number; // mud: 0.5, ice: 1.5, normal: 1.0
+  pathfindingCost: number; // mud: 2.0, ice: 0.8, normal: 1.0
+}
+
 export interface GridCell {
   col: number;
   row: number;
@@ -127,4 +140,5 @@ export interface NavGrid {
   cols: number;
   rows: number;
   blocked: boolean[][];
+  terrainCost: number[][]; // Movement cost per cell
 }

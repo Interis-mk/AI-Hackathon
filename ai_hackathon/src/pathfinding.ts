@@ -1,4 +1,4 @@
-import { GridCell, NavGrid, Obstacle } from './types'
+import { GridCell, NavGrid, Obstacle, TerrainPatch } from './types'
 
 function clamp(v: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, v))
@@ -9,11 +9,13 @@ export function buildNavGrid(
   arenaHeight: number,
   cellSize: number,
   obstacles: Obstacle[],
+  terrainPatches: TerrainPatch[],
   padding: number = 10
 ): NavGrid {
   const cols = Math.ceil(arenaWidth / cellSize)
   const rows = Math.ceil(arenaHeight / cellSize)
   const blocked: boolean[][] = Array.from({ length: rows }, () => Array(cols).fill(false))
+  const terrainCost: number[][] = Array.from({ length: rows }, () => Array(cols).fill(1.0))
 
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < cols; col++) {
@@ -26,10 +28,19 @@ export function buildNavGrid(
         cy >= o.y - padding &&
         cy <= o.y + o.height + padding
       )
+
+      // Apply terrain cost
+      for (const patch of terrainPatches) {
+        if (cx >= patch.x && cx <= patch.x + patch.width &&
+            cy >= patch.y && cy <= patch.y + patch.height) {
+          terrainCost[row][col] = patch.pathfindingCost
+          break
+        }
+      }
     }
   }
 
-  return { cellSize, cols, rows, blocked }
+  return { cellSize, cols, rows, blocked, terrainCost }
 }
 
 export function worldToGrid(grid: NavGrid, x: number, y: number): GridCell {
@@ -154,7 +165,8 @@ export function findPathAStar(grid: NavGrid, startRaw: GridCell, goalRaw: GridCe
       if (closed.has(nKey)) continue
 
       const stepCost = (n.col !== current.cell.col && n.row !== current.cell.row) ? 1.414 : 1
-      const tentativeG = (gScore.get(current.key) ?? Infinity) + stepCost
+      const terrainCost = grid.terrainCost[n.row][n.col]
+      const tentativeG = (gScore.get(current.key) ?? Infinity) + (stepCost * terrainCost)
 
       if (tentativeG < (gScore.get(nKey) ?? Infinity)) {
         cameFrom.set(nKey, current.key)

@@ -13,7 +13,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'scout',
     name: 'Scout Drone',
     health: 20,
-    speed: 12,
+    speed: 45,
     damage: 5,
     xpReward: 10,
     visuals: {
@@ -26,7 +26,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'pulse',
     name: 'Pulse Drone',
     health: 30,
-    speed: 8,
+    speed: 45,
     damage: 8,
     xpReward: 15,
     visuals: {
@@ -39,7 +39,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'swarm',
     name: 'Swarm Drone',
     health: 15,
-    speed: 10,
+    speed: 45,
     damage: 3,
     xpReward: 7,
     visuals: {
@@ -53,7 +53,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'shield',
     name: 'Shield Drone',
     health: 40,
-    speed: 6,
+    speed: 45,
     damage: 10,
     xpReward: 20,
     visuals: {
@@ -69,7 +69,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'phase',
     name: 'Phase Drone',
     health: 25,
-    speed: 14,
+    speed: 45,
     damage: 7,
     xpReward: 18,
     visuals: {
@@ -85,7 +85,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'overclocked',
     name: 'Overclocked Drone',
     health: 35,
-    speed: 10,
+    speed: 45,
     damage: 12,
     xpReward: 22,
     visuals: {
@@ -98,7 +98,7 @@ export const ENEMY_TYPES: Record<string, EnemyTemplate> = {
     id: 'regenerating',
     name: 'Regenerating Drone',
     health: 30,
-    speed: 8,
+    speed: 45,
     damage: 8,
     xpReward: 19,
     visuals: {

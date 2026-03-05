@@ -3,7 +3,7 @@
  * Handles all 2D game rendering using HTML5 Canvas
  */
 
-import { Obstacle } from './types'
+import { Obstacle, TerrainPatch } from './types'
 
 export class SceneManager {
   public canvas: HTMLCanvasElement
@@ -155,6 +155,59 @@ export class SceneManager {
     this.ctx.strokeStyle = '#00aaff'
     this.ctx.lineWidth = 2 / this.cameraZoom
     this.ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+  }
+
+  /**
+   * Draw a terrain patch (mud or ice)
+   */
+  public drawTerrainPatch(patch: TerrainPatch): void {
+    // Set color based on terrain type
+    if (patch.type === 'mud') {
+      this.ctx.fillStyle = 'rgba(101, 67, 33, 0.5)' // Brown/mud color
+    } else if (patch.type === 'ice') {
+      this.ctx.fillStyle = 'rgba(173, 216, 230, 0.5)' // Light blue/ice color
+    } else {
+      this.ctx.fillStyle = 'rgba(100, 100, 100, 0.3)' // Default gray
+    }
+
+    this.ctx.fillRect(patch.x, patch.y, patch.width, patch.height)
+
+    // Draw border with matching color
+    if (patch.type === 'mud') {
+      this.ctx.strokeStyle = 'rgba(101, 67, 33, 0.8)'
+    } else if (patch.type === 'ice') {
+      this.ctx.strokeStyle = 'rgba(173, 216, 230, 0.8)'
+    } else {
+      this.ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)'
+    }
+
+    this.ctx.lineWidth = 2 / this.cameraZoom
+    this.ctx.strokeRect(patch.x, patch.y, patch.width, patch.height)
+
+    // Add pattern for visual distinction
+    this.ctx.strokeStyle = this.ctx.strokeStyle
+    this.ctx.lineWidth = 1 / this.cameraZoom
+
+    if (patch.type === 'mud') {
+      // Draw wavy lines for mud
+      const waveCount = Math.floor(patch.height / 40)
+      for (let i = 0; i < waveCount; i++) {
+        const y = patch.y + (i + 1) * (patch.height / (waveCount + 1))
+        this.ctx.beginPath()
+        this.ctx.moveTo(patch.x, y)
+        this.ctx.lineTo(patch.x + patch.width, y)
+        this.ctx.stroke()
+      }
+    } else if (patch.type === 'ice') {
+      // Draw diagonal lines for ice
+      const lineSpacing = 50
+      this.ctx.beginPath()
+      for (let offset = -patch.height; offset < patch.width; offset += lineSpacing) {
+        this.ctx.moveTo(patch.x + offset, patch.y)
+        this.ctx.lineTo(patch.x + offset + patch.height, patch.y + patch.height)
+      }
+      this.ctx.stroke()
+    }
   }
 
   /**
