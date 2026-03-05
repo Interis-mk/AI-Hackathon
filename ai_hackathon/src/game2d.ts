@@ -24,6 +24,14 @@ import {
   damageEnemy,
   ENEMY_TYPES,
 } from './enemies'
+
+import {
+  spawnWaveEnemies,
+  getWaveDescription,
+  getDifficultyIndicator,
+  calculateDifficultyMultiplier,
+} from './waves'
+
 import { Vector3, generateUUID, randomFloat, clamp } from './utils'
 
 export class GameManager {
@@ -75,8 +83,14 @@ export class GameManager {
         xpBoost: 1.0,
         cooldownReduction: 1.0,
       },
-      position: { x: 400, y: 300 },
-      velocity: { x: 0, y: 0 },
+      position: {
+          x: 550, y: 325,
+          z: 0
+      },
+      velocity: {
+          x: 0, y: 0,
+          z: 0
+      },
       meshInstance: null,
     }
 
@@ -320,32 +334,24 @@ export class GameManager {
     this.gameState.currentWave++
     this.updateUIWave()
 
-    const waveConfig: Array<{ type: string; count: number }> = []
+    // Get wave configuration
+    const waveDescription = getWaveDescription(this.gameState.currentWave)
+    const difficultyIndicator = getDifficultyIndicator(this.gameState.currentWave)
 
-    if (this.gameState.currentWave === 1) {
-      waveConfig.push({ type: 'scout', count: 3 })
-    } else if (this.gameState.currentWave === 2) {
-      waveConfig.push({ type: 'pulse', count: 2 })
-      waveConfig.push({ type: 'scout', count: 1 })
-    } else {
-      waveConfig.push({ type: 'swarm', count: 2 })
-      waveConfig.push({ type: 'pulse', count: 1 })
-    }
+    // Show wave start notification
+    this.showNotification(`Wave ${this.gameState.currentWave}: ${waveDescription}`)
+    console.log(`Wave ${this.gameState.currentWave} - Difficulty: ${difficultyIndicator}`)
 
-    waveConfig.forEach(({ type, count }) => {
-      for (let i = 0; i < count; i++) {
-        const angle = (i / count) * Math.PI * 2
-        const radius = 150
-        const position = {
-          x: this.player.position.x + Math.cos(angle) * radius,
-          y: this.player.position.y + Math.sin(angle) * radius,
-          z: 0,
-        }
+    // Spawn enemies using wave system
+    const spawnedEnemies = spawnWaveEnemies(
+      this.gameState.currentWave,
+      this.player.position.x,
+      this.player.position.y
+    )
 
-        const enemy = createEnemy(type, position)
-        applyDifficultyMultiplier(enemy, this.gameState.currentWave)
-        this.enemies.set(enemy.id, enemy)
-      }
+    // Add enemies to game
+    spawnedEnemies.forEach((enemy) => {
+      this.enemies.set(enemy.id, enemy)
     })
   }
 

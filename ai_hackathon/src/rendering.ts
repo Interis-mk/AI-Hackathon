@@ -9,9 +9,9 @@ export class SceneManager {
   public width: number
   public height: number
 
-  // Arena dimensions
-  public arenaWidth = 800
-  public arenaHeight = 600
+  // Arena dimensions - much larger to feel less zoomed in
+  public arenaWidth = 1100
+  public arenaHeight = 650
   public arenaOffsetX: number
   public arenaOffsetY: number
 

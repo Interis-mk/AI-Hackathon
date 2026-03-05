@@ -2,7 +2,7 @@
  * Main entry point for AI Arena game
  */
 
-import { GameManager } from './game2d'
+import {GameManager} from './game2d'
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,10 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Create game manager
-  const game = new GameManager(canvas)
-
-  // Expose to window for HTML onclick handlers
-  ;(window as any).game = game
+    (window as any).game = new GameManager(canvas)
 
   console.log('AI Arena (2D) initialized. Click "Start Game" button to begin.')
 })
