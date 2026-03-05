@@ -4,14 +4,26 @@ export class MovingEnemy {
   mesh: any;
   target: any;
   speed: number;
+  hp: number;
   private _obs: Observer<Scene> | null = null;
 
-  constructor(mesh: any, target: any, speed = 0.03) {
+  constructor(mesh: any, target: any, speed = 0.03, hp = 10) {
     this.mesh = mesh;
     this.target = target;
     this.speed = speed;
+    this.hp = hp;
     const scene = mesh.getScene();
     this._obs = scene.onBeforeRenderObservable.add(() => this._update());
+  }
+
+  takeDamage(amount: number) {
+    this.hp -= amount;
+    if (this.hp <= 0) {
+      this.dispose();
+      this.mesh.dispose();
+      return true; // Enemy died
+    }
+    return false;
   }
 
   private _update() {
