@@ -119,43 +119,6 @@
         font-weight: bold;
       }
 
-      /* Center Crosshair */
-      .crosshair {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 30px;
-        height: 30px;
-        border: 2px solid #00ff00;
-        border-radius: 50%;
-        z-index: 100;
-        box-shadow: 0 0 5px #00ff00;
-      }
-
-      .crosshair::before,
-      .crosshair::after {
-        content: '';
-        position: absolute;
-        background: #00ff00;
-      }
-
-      .crosshair::before {
-        width: 2px;
-        height: 10px;
-        left: 50%;
-        top: -12px;
-        transform: translateX(-50%);
-      }
-
-      .crosshair::after {
-        width: 10px;
-        height: 2px;
-        left: -12px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
       /* Hotbar */
       .hotbar {
         position: absolute;
@@ -184,19 +147,72 @@
         font-size: 12px;
         font-weight: bold;
         color: #ff00ff;
+        text-align: center;
+        padding: 4px;
+        word-wrap: break-word;
+        overflow: hidden;
+        transition: opacity 0.1s ease;
+      }
+
+      .ability-slot.has-ability {
+        background: rgba(80, 0, 80, 0.9);
+        border-color: #ff00aa;
+        color: #fff;
       }
 
       .ability-slot:hover {
         box-shadow: 0 0 10px #ff00ff;
       }
 
-      .ability-slot.cooldown::after {
-        content: '';
+      .ability-slot::after {
+        content: attr(data-tooltip);
         position: absolute;
-        inset: 0;
-        background: conic-gradient(#ff0000, transparent);
-        border-radius: 4px;
-        opacity: 0.5;
+        bottom: -140px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        color: #00ff00;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 2px solid #00ff00;
+        font-size: 11px;
+        white-space: nowrap;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        text-align: center;
+        font-weight: normal;
+        max-width: 150px;
+        white-space: normal;
+      }
+
+      .ability-slot:hover::after {
+        opacity: 1;
+      }
+
+      .ability-slot.cooldown {
+        background: linear-gradient(135deg, rgba(80, 0, 80, 0.6) 0%, rgba(40, 0, 40, 0.6) 100%);
+        border-color: #ff0000;
+        filter: brightness(0.7);
+      }
+
+      .cooldown-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #ffff00;
+        font-size: 16px;
+        font-weight: bold;
+        text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 3px #ff0000;
+        pointer-events: none;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 2px 4px;
+        border-radius: 2px;
+        min-width: 24px;
+        text-align: center;
       }
 
       .ability-slot-label {
@@ -210,10 +226,10 @@
       /* Notifications */
       .notification {
         position: fixed;
-        top: 50%;
+        top: 30px;
         left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(0, 50, 100, 0.9);
+        transform: translateX(-50%);
+        background: rgba(0, 50, 100, 0.4);
         border: 2px solid #00aaff;
         padding: 20px;
         border-radius: 8px;
@@ -250,6 +266,308 @@
         color: #00ff00;
         pointer-events: none;
         display: none;
+      }
+
+      /* Merge UI */
+      #merge-ui {
+        position: absolute;
+        inset: 0;
+        background: rgba(5, 5, 15, 0.94);
+        border: none;
+        border-radius: 0;
+        padding: 24px;
+        display: none;
+        flex-direction: column;
+        gap: 16px;
+        z-index: 150;
+        pointer-events: auto;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+
+      .merge-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .merge-meta {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+
+      #merge-ui h2 {
+        color: #ff00aa;
+        margin: 0;
+      }
+
+      #merge-counter {
+        color: #00ff00;
+        font-size: 14px;
+      }
+
+      #merge-pause-label {
+        color: #00aaff;
+        font-size: 13px;
+      }
+
+      .merge-layout {
+        display: grid;
+        grid-template-columns: 320px minmax(0, 1fr);
+        gap: 18px;
+        min-height: 0;
+        flex: 1;
+      }
+
+      .inventory-panel {
+        border: 2px solid #1d4b66;
+        border-radius: 8px;
+        background: rgba(12, 12, 24, 0.85);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .inventory-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #00aaff;
+      }
+
+      #inventory-hotbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .inventory-hotbar-slot {
+        border: 2px solid #666;
+        border-radius: 6px;
+        background: rgba(25, 25, 25, 0.9);
+        color: #fff;
+        padding: 8px;
+        min-height: 56px;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .inventory-hotbar-slot.active {
+        border-color: #00aaff;
+        box-shadow: 0 0 8px rgba(0, 170, 255, 0.8);
+      }
+
+      .inventory-hotbar-slot .slot-number {
+        font-size: 11px;
+        color: #00aaff;
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .inventory-hotbar-slot .slot-ability {
+        font-size: 12px;
+        color: #fff;
+      }
+
+      .inventory-hotbar-slot .slot-empty {
+        color: #777;
+      }
+
+      .secondary-button {
+        padding: 8px 10px;
+        border: 2px solid #666;
+        border-radius: 6px;
+        background: #222;
+        color: #fff;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .secondary-button:hover {
+        border-color: #aaa;
+      }
+
+      .merge-main {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 0;
+      }
+
+      .merge-slots {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+
+      .merge-slot {
+        width: 180px;
+        height: 90px;
+        background: rgba(30, 30, 30, 0.9);
+        border: 2px solid #666;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        text-align: center;
+        padding: 8px;
+      }
+
+      .merge-slot.selected {
+        border-color: #ff00aa;
+        background: rgba(255, 0, 170, 0.2);
+      }
+
+      .merge-slot.active {
+        border-color: #00aaff;
+        box-shadow: 0 0 10px rgba(0, 170, 255, 0.8);
+      }
+
+      .merge-arrow {
+        font-size: 32px;
+        color: #ff00aa;
+      }
+
+      .ability-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        min-height: 0;
+        flex: 1;
+      }
+
+      .ability-section {
+        border: 2px solid #444;
+        border-radius: 6px;
+        background: rgba(20, 20, 20, 0.8);
+        padding: 10px;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .ability-section h3 {
+        color: #00aaff;
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .ability-list {
+        max-height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-content: flex-start;
+      }
+
+      .ability-item {
+        padding: 6px 12px;
+        background: rgba(50, 50, 50, 0.9);
+        border: 2px solid #ff00ff;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+      }
+
+      .ability-item:hover {
+        border-color: #ff00aa;
+      }
+
+      .ability-item::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 130%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        color: #00aaff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #00aaff;
+        font-size: 10px;
+        white-space: normal;
+        z-index: 1001;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        text-align: center;
+        font-weight: normal;
+        max-width: 120px;
+        width: max-content;
+      }
+
+      .ability-item:hover::after {
+        opacity: 1;
+      }
+
+      .ability-item {
+        position: relative;
+      }
+
+      .ability-item.selected {
+        background: rgba(255, 0, 170, 0.4);
+        border-color: #ff00aa;
+      }
+
+      .ability-item.disabled {
+        opacity: 0.5;
+      }
+
+      .merge-buttons {
+        display: flex;
+        gap: 15px;
+      }
+
+      .merge-button {
+        padding: 10px 25px;
+        background: #00aa00;
+        border: 2px solid #00ff00;
+        border-radius: 6px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .merge-button:hover {
+        background: #00ff00;
+        box-shadow: 0 0 10px #00ff00;
+      }
+
+      .merge-button:disabled {
+        background: #333;
+        border-color: #666;
+        color: #666;
+        cursor: not-allowed;
+      }
+
+      .merge-button.cancel {
+        background: #aa0000;
+        border-color: #ff0000;
+      }
+
+      .merge-button.cancel:hover {
+        background: #ff0000;
+        box-shadow: 0 0 10px #ff0000;
       }
 
       /* Menu Styles */
@@ -311,7 +629,6 @@
         text-align: center;
         pointer-events: auto;
       }
-      }
 
       #game-over h2 {
         font-size: 48px;
@@ -365,6 +682,7 @@
         <h2>Game Over</h2>
         <div class="stats">
           <div class="stat-line">Wave Reached: <span id="final-wave">0</span></div>
+          <div class="stat-line">Enemies Defeated: <span id="final-enemies">0</span></div>
           <div class="stat-line">Total XP: <span id="final-xp">0</span></div>
           <div class="stat-line">Level: <span id="final-level">0</span></div>
           <div class="stat-line">Abilities Acquired: <span id="final-abilities">0</span></div>
@@ -399,13 +717,70 @@
         </div>
       </div>
 
-      <div class="crosshair"></div>
-
       <div class="hotbar">
         <div class="ability-slot" data-slot="1">Slot 1</div>
         <div class="ability-slot" data-slot="2">Slot 2</div>
         <div class="ability-slot" data-slot="3">Slot 3</div>
         <div class="ability-slot" data-slot="4">Slot 4</div>
+      </div>
+
+      <button class="merge-open-button" id="merge-open-btn" onclick="window.game?.openMergeUI()">
+        Merge Abilities (M)
+      </button>
+
+      <div id="merge-ui">
+        <div class="merge-header">
+          <h2>Inventory and Merge</h2>
+          <div class="merge-meta">
+            <div id="merge-counter">Merges Remaining: 4</div>
+            <div id="merge-pause-label">Game paused while inventory is open</div>
+          </div>
+        </div>
+
+        <div class="merge-layout">
+          <div class="inventory-panel">
+            <div class="inventory-title">Active Hotbar Assignment</div>
+            <div id="inventory-hotbar">
+              <button class="inventory-hotbar-slot" id="inv-hotbar-slot-1" onclick="window.game?.selectHotbarSlot(1)"></button>
+              <button class="inventory-hotbar-slot" id="inv-hotbar-slot-2" onclick="window.game?.selectHotbarSlot(2)"></button>
+              <button class="inventory-hotbar-slot" id="inv-hotbar-slot-3" onclick="window.game?.selectHotbarSlot(3)"></button>
+              <button class="inventory-hotbar-slot" id="inv-hotbar-slot-4" onclick="window.game?.selectHotbarSlot(4)"></button>
+            </div>
+            <button class="secondary-button" onclick="window.game?.clearSelectedHotbarSlot()">Unequip Selected Slot</button>
+          </div>
+
+          <div class="merge-main">
+            <div class="merge-slots">
+              <div class="merge-slot" id="merge-slot-1" onclick="window.game?.selectMergeSlot(1)">
+                <span>Select Ability 1</span>
+              </div>
+              <div class="merge-arrow">-></div>
+              <div class="merge-slot" id="merge-slot-2" onclick="window.game?.selectMergeSlot(2)">
+                <span>Select Ability 2</span>
+              </div>
+            </div>
+
+            <div class="ability-sections">
+              <div class="ability-section">
+                <h3>Active Abilities</h3>
+                <div id="ability-list-active" class="ability-list"></div>
+              </div>
+              <div class="ability-section">
+                <h3>Passive Abilities</h3>
+                <div id="ability-list-passive" class="ability-list"></div>
+              </div>
+            </div>
+
+            <div class="merge-buttons">
+              <button class="merge-button" id="merge-confirm-btn" onclick="window.game?.confirmMerge()" disabled>
+                Merge Selected Abilities
+              </button>
+              <button class="merge-button cancel" onclick="window.game?.closeMergeUI()">
+                Close Inventory
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div id="fps-counter"></div>

@@ -3,7 +3,7 @@
  */
 
 import { Player, Ability } from './types'
-import { getRandomAbility, getPassiveAbilities, getActiveAbilities } from './abilities'
+import { getPassiveAbilities, getActiveAbilities } from './abilities'
 
 /**
  * Calculate XP reward from defeating an enemy
@@ -68,13 +68,31 @@ export function addXPToPlayer(player: Player, xpAmount: number): boolean {
 }
 
 /**
- * Grant an ability to the player on level-up
- * 50% chance for active, 50% chance for passive
+ * Grant an ability to the player on level-up.
+ * Uses unique pool selection so base abilities are never granted twice.
  */
-export function grantLevelUpAbility(player: Player): Ability {
-  const isActive = Math.random() < 0.5
-  const ability = isActive ? getRandomActiveAbility() : getRandomPassiveAbility()
+export function grantLevelUpAbility(player: Player): Ability | null {
+  const activePool = getActiveAbilities().filter(
+    (ability) => !player.inventory.some((owned) => owned.id === ability.id)
+  )
+  const passivePool = getPassiveAbilities().filter(
+    (ability) => !player.inventory.some((owned) => owned.id === ability.id)
+  )
 
+  if (activePool.length === 0 && passivePool.length === 0) {
+    return null
+  }
+
+  let selectedPool: Ability[]
+  if (activePool.length === 0) {
+    selectedPool = passivePool
+  } else if (passivePool.length === 0) {
+    selectedPool = activePool
+  } else {
+    selectedPool = Math.random() < 0.5 ? activePool : passivePool
+  }
+
+  const ability = selectedPool[Math.floor(Math.random() * selectedPool.length)]
   player.inventory.push(ability)
 
   return ability
@@ -148,12 +166,12 @@ export function applyPassiveAbility(player: Player, ability: Ability): void {
  * Called when inventory changes
  */
 export function recalculatePlayerStats(player: Player): void {
-  // Reset to base stats
+  // Reset to base stats (must match initial player stats in game2d.ts)
   player.stats = {
     fireRate: 3.0, // 3 shots per second
-    projectileSpeed: 50.0, // units per second
+    projectileSpeed: 250.0, // units per second
     maxEnergy: 100.0,
-    xpBoost: 1.0,
+    xpBoost: 5.0, // Base XP boost
     cooldownReduction: 1.0,
   }
 
@@ -179,4 +197,3 @@ export function recalculatePlayerStats(player: Player): void {
     player.currentEnergy = player.stats.maxEnergy
   }
 }
-

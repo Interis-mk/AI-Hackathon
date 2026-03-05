@@ -3,6 +3,8 @@
  * Handles all 2D game rendering using HTML5 Canvas
  */
 
+import { Obstacle } from './types'
+
 export class SceneManager {
   public canvas: HTMLCanvasElement
   public ctx: CanvasRenderingContext2D
@@ -16,7 +18,7 @@ export class SceneManager {
   // Camera system for zooming and following player
   public cameraX: number = 800
   public cameraY: number = 600
-  public cameraZoom: number = 0.6 // 0.6 = zoomed out (see more), 1.0 = normal
+  public cameraZoom: number = 0.75 // 0.6 = zoomed out (see more), 1.0 = normal
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -146,6 +148,15 @@ export class SceneManager {
     this.ctx.fillRect(x - width / 2, y - height / 2, width, height)
   }
 
+  public drawObstacle(obstacle: Obstacle): void {
+    this.ctx.fillStyle = '#2b2b2b'
+    this.ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+
+    this.ctx.strokeStyle = '#00aaff'
+    this.ctx.lineWidth = 2 / this.cameraZoom
+    this.ctx.strokeRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height)
+  }
+
   /**
    * Draw a health bar above an entity
    */
@@ -217,4 +228,3 @@ export class SceneManager {
     // Canvas doesn't need cleanup
   }
 }
-

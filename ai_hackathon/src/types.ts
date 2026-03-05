@@ -109,3 +109,22 @@ export interface WaveConfig {
   difficultyMultiplier: number;
 }
 
+export interface Obstacle {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface GridCell {
+  col: number;
+  row: number;
+}
+
+export interface NavGrid {
+  cellSize: number;
+  cols: number;
+  rows: number;
+  blocked: boolean[][];
+}
