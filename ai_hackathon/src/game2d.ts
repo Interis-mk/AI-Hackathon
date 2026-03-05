@@ -47,7 +47,7 @@ export class GameManager {
   private waveDelay = 5
   private isGameOver = false
   private keys: Record<string, boolean> = {}
-  private mousePos = { x: 0, y: 0 }
+  private mouseWorldPos = { x: 800, y: 600 } // Mouse position in world coordinates
   private shootDirection = { x: 1, y: 0 }
 
   constructor(canvas: HTMLCanvasElement) {
@@ -84,7 +84,7 @@ export class GameManager {
         cooldownReduction: 1.0,
       },
       position: {
-          x: 550, y: 325,
+          x: 800, y: 600,
           z: 0
       },
       velocity: {
@@ -126,12 +126,16 @@ export class GameManager {
     // Mouse input
     canvas.addEventListener('mousemove', (e) => {
       const rect = canvas.getBoundingClientRect()
-      this.mousePos.x = e.clientX - rect.left
-      this.mousePos.y = e.clientY - rect.top
+      const screenX = e.clientX - rect.left
+      const screenY = e.clientY - rect.top
 
-      // Calculate shoot direction
-      const dx = this.mousePos.x - this.player.position.x
-      const dy = this.mousePos.y - this.player.position.y
+      // Convert screen position to world position
+      const worldPos = this.sceneManager.screenToWorld(screenX, screenY)
+      this.mouseWorldPos = worldPos
+
+      // Calculate shoot direction from player to mouse cursor
+      const dx = worldPos.x - this.player.position.x
+      const dy = worldPos.y - this.player.position.y
       const dist = Math.sqrt(dx * dx + dy * dy)
       if (dist > 0) {
         this.shootDirection.x = dx / dist
@@ -240,16 +244,14 @@ export class GameManager {
       moveX /= len
       moveY /= len
 
-      const moveSpeed = 150
+      const moveSpeed = 200
       const newX = this.player.position.x + moveX * moveSpeed * deltaTime
       const newY = this.player.position.y + moveY * moveSpeed * deltaTime
 
-      // Clamp to arena bounds
-      const padding = 20
-      this.player.position.x = clamp(newX, this.sceneManager.arenaOffsetX + padding,
-                                      this.sceneManager.arenaOffsetX + this.sceneManager.arenaWidth - padding)
-      this.player.position.y = clamp(newY, this.sceneManager.arenaOffsetY + padding,
-                                      this.sceneManager.arenaOffsetY + this.sceneManager.arenaHeight - padding)
+      // Clamp to arena bounds (world coordinates)
+      const padding = 30
+      this.player.position.x = clamp(newX, padding, this.sceneManager.arenaWidth - padding)
+      this.player.position.y = clamp(newY, padding, this.sceneManager.arenaHeight - padding)
     }
   }
 
@@ -374,38 +376,81 @@ export class GameManager {
   }
 
   private render(): void {
+    // Update camera to follow player
+    this.sceneManager.updateCamera(this.player.position.x, this.player.position.y)
+
+    // Clear and draw arena
     this.sceneManager.clear()
 
+    // Begin world-space rendering (with camera transform)
+    this.sceneManager.beginWorldRender()
+
     // Draw player
-    const playerScreen = this.sceneManager.worldToScreen(this.player.position.x, this.player.position.y)
-    this.sceneManager.drawCircle(playerScreen.x, playerScreen.y, 12, '#00ff00')
+    this.sceneManager.drawCircle(this.player.position.x, this.player.position.y, 15, '#00ff00')
 
     // Draw player direction indicator
-    const dirX = playerScreen.x + this.shootDirection.x * 15
-    const dirY = playerScreen.y + this.shootDirection.y * 15
+    const dirX = this.player.position.x + this.shootDirection.x * 25
+    const dirY = this.player.position.y + this.shootDirection.y * 25
     this.sceneManager.ctx.strokeStyle = '#00ff00'
-    this.sceneManager.ctx.lineWidth = 2
+    this.sceneManager.ctx.lineWidth = 3 / this.sceneManager.cameraZoom
     this.sceneManager.ctx.beginPath()
-    this.sceneManager.ctx.moveTo(playerScreen.x, playerScreen.y)
+    this.sceneManager.ctx.moveTo(this.player.position.x, this.player.position.y)
     this.sceneManager.ctx.lineTo(dirX, dirY)
     this.sceneManager.ctx.stroke()
 
+    // Draw aiming line from player to mouse (for visual feedback)
+    if (this.gameState.isRunning) {
+      this.sceneManager.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
+      this.sceneManager.ctx.lineWidth = 1 / this.sceneManager.cameraZoom
+      this.sceneManager.ctx.setLineDash([5 / this.sceneManager.cameraZoom, 5 / this.sceneManager.cameraZoom])
+      this.sceneManager.ctx.beginPath()
+      this.sceneManager.ctx.moveTo(this.player.position.x, this.player.position.y)
+      this.sceneManager.ctx.lineTo(this.mouseWorldPos.x, this.mouseWorldPos.y)
+      this.sceneManager.ctx.stroke()
+      this.sceneManager.ctx.setLineDash([]) // Reset dash
+    }
+
     // Draw enemies
     this.enemies.forEach((enemy) => {
-      const enemyScreen = this.sceneManager.worldToScreen(enemy.position.x, enemy.position.y)
       const template = ENEMY_TYPES[enemy.type]
       const color = template?.visuals?.color || '#ff00ff'
-      const size = template?.visuals?.scale ? 8 * template.visuals.scale : 8
+      const size = template?.visuals?.scale ? 12 * template.visuals.scale : 12
 
-      this.sceneManager.drawCircle(enemyScreen.x, enemyScreen.y, size, color)
-      this.sceneManager.drawHealthBar(enemyScreen.x, enemyScreen.y, enemy.health, enemy.maxHealth, 20)
+      this.sceneManager.drawCircle(enemy.position.x, enemy.position.y, size, color)
+      this.sceneManager.drawHealthBar(enemy.position.x, enemy.position.y, enemy.health, enemy.maxHealth, 30)
     })
 
     // Draw projectiles
     this.projectiles.forEach((projectile) => {
-      const projScreen = this.sceneManager.worldToScreen(projectile.position.x, projectile.position.y)
-      this.sceneManager.drawRect(projScreen.x, projScreen.y, 4, 4, '#ffff00')
+      this.sceneManager.drawRect(projectile.position.x, projectile.position.y, 6, 6, '#ffff00')
     })
+
+    // Draw mouse cursor crosshair (for debugging aiming accuracy)
+    if (this.gameState.isRunning) {
+      const crosshairSize = 10
+      this.sceneManager.ctx.strokeStyle = '#ffffff'
+      this.sceneManager.ctx.lineWidth = 2 / this.sceneManager.cameraZoom
+
+      // Vertical line
+      this.sceneManager.ctx.beginPath()
+      this.sceneManager.ctx.moveTo(this.mouseWorldPos.x, this.mouseWorldPos.y - crosshairSize)
+      this.sceneManager.ctx.lineTo(this.mouseWorldPos.x, this.mouseWorldPos.y + crosshairSize)
+      this.sceneManager.ctx.stroke()
+
+      // Horizontal line
+      this.sceneManager.ctx.beginPath()
+      this.sceneManager.ctx.moveTo(this.mouseWorldPos.x - crosshairSize, this.mouseWorldPos.y)
+      this.sceneManager.ctx.lineTo(this.mouseWorldPos.x + crosshairSize, this.mouseWorldPos.y)
+      this.sceneManager.ctx.stroke()
+
+      // Circle
+      this.sceneManager.ctx.beginPath()
+      this.sceneManager.ctx.arc(this.mouseWorldPos.x, this.mouseWorldPos.y, 5, 0, Math.PI * 2)
+      this.sceneManager.ctx.stroke()
+    }
+
+    // End world-space rendering
+    this.sceneManager.endWorldRender()
   }
 
   public startGame(): void {

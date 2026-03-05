@@ -1,8 +1,47 @@
 # AI Arena Constitution
 
+## 🎮 RENDERING ARCHITECTURE - READ FIRST
+
+**THIS IS A 2D GAME - NOT 3D**
+
+- **Rendering Engine:** HTML5 Canvas 2D API
+- **Game File:** `src/game2d.ts` (ACTIVE)
+- **Rendering File:** `src/rendering.ts` (ACTIVE)
+- **Perspective:** Top-down 2D view
+- **Camera:** 2D follow camera with zoom
+
+**DO NOT:**
+- ❌ Use BabylonJS, Three.js, or any 3D libraries
+- ❌ Reference `game.ts` or `rendering3d.ts` (deprecated 3D files)
+- ❌ Implement 3D coordinates (x, y, z) - use 2D (x, y) only
+- ❌ Use 3D concepts like meshes, quaternions, or 3D vectors
+
+**ALWAYS:**
+- ✅ Use Canvas 2D API for all rendering
+- ✅ Work with `game2d.ts` for game logic
+- ✅ Use 2D coordinates and 2D vector math
+- ✅ Think top-down arcade shooter, not first-person shooter
+
+---
+
 ## Project Charter
 
 **AI Arena** is a web-based arena shooter hackathon project designed to demonstrate AI-driven game design. Players engage in a fast-paced combat simulation where waves of malfunctioning drones must be disabled, while collecting and combining AI-generated abilities for a dynamic, replayable experience.
+
+### 🏃 Hackathon Philosophy
+
+**SHIP FAST, DOCUMENT NEVER**
+
+This is a **hackathon project** optimized for:
+- ✅ **Working demos** that can be played immediately
+- ✅ **Rapid iteration** with minimal overhead
+- ✅ **Code-first approach** - let the code speak
+- ✅ **Show, don't tell** - playable > readable
+- ❌ **NO formal documentation required**
+- ❌ **NO extensive comments** unless truly needed
+- ❌ **NO project management overhead**
+
+**The best documentation is a working game.**
 
 ---
 
@@ -37,10 +76,14 @@ Every gameplay element must demonstrate AI participation:
 - Training simulation aesthetic (not warfare)
 - Futuristic, neon sci-fi visual identity
 
-### 4. **Rapid Experimentation**
+### 4. **Rapid Experimentation (Hackathon Speed)**
 - All gameplay systems must be data-driven (JSON format)
 - AI systems must be pluggable and replaceable
 - Easy iteration on ability stats and mechanics
+- **NO DOCUMENTATION REQUIRED** - Code should be self-explanatory
+- Focus on working demos, not written explanations
+- Comments only when logic is non-obvious
+- Git commits are the history, not docs
 
 ---
 
@@ -51,9 +94,11 @@ Every gameplay element must demonstrate AI participation:
 | Technology | Purpose                |
 |-----------|------------------------|
 | TypeScript | Type-safe game logic   |
-| Babylon.js | 3D rendering & physics |
+| HTML5 Canvas | **2D rendering (NOT 3D)** |
 | Vite       | Fast development build |
 | JSON       | All game data format   |
+
+**CRITICAL: This is a 2D top-down arena shooter using HTML5 Canvas 2D rendering. Do NOT use BabylonJS, Three.js, or any 3D rendering libraries. All rendering is done via Canvas 2D API.**
 
 ### AI Integration
 
@@ -67,23 +112,62 @@ Every gameplay element must demonstrate AI participation:
 
 ```
 src/
-├── game/
-│   ├── player/          # Player character, movement, shooting
-│   ├── enemies/         # Drone types, behaviors, mutations
-│   ├── abilities/       # Ability system, passive/active effects
-│   ├── waves/           # Wave spawning, difficulty scaling
-│   └── systems/         # XP, leveling, progression
-│
-├── ai/
-│   ├── chatgpt/         # Ability generation service
-│   ├── gemini/          # Enemy mutation service
-│   └── claude/          # Event description service
-│
-├── rendering/
-│   └── babylon/         # Babylon.js scene, camera, effects
-│
-└── main.ts              # Entry point
+├── game2d.ts            # Main 2D game manager (ACTIVE - USE THIS)
+├── rendering.ts         # 2D Canvas rendering system (ACTIVE)
+├── player/              # Player character, movement, shooting
+├── enemies/             # Drone types, behaviors, mutations
+├── abilities/           # Ability system, passive/active effects
+├── waves/               # Wave spawning, difficulty scaling
+└── systems/             # XP, leveling, progression
+
+DEPRECATED FILES (DO NOT USE):
+├── game.ts              # Old 3D version - DO NOT USE OR MODIFY
+└── rendering3d.ts       # Old 3D rendering - DO NOT USE
 ```
+
+**Implementation Notes:**
+- All game logic is in `game2d.ts`
+- All rendering uses `rendering.ts` (2D Canvas SceneManager)
+- Player position is in 2D coordinates (x, y)
+- Camera follows player in 2D world space
+- Mouse aiming uses screen-to-world coordinate conversion
+
+### 2D Rendering Implementation Guide
+
+**Coordinate System:**
+- World space: Large 2D arena (e.g., 1600x1200)
+- Screen space: Canvas viewport (e.g., 800x600)
+- Camera transforms world coordinates to screen coordinates
+- Mouse input converts screen coordinates back to world coordinates
+
+**Core Rendering Functions (rendering.ts):**
+```typescript
+// Camera control
+updateCamera(targetX: number, targetY: number): void
+screenToWorld(screenX: number, screenY: number): { x: number; y: number }
+
+// Drawing primitives
+drawCircle(x: number, y: number, radius: number, color: string): void
+drawRect(x: number, y: number, width: number, height: number, color: string): void
+drawHealthBar(x: number, y: number, health: number, maxHealth: number): void
+
+// Rendering pipeline
+beginWorldRender(): void  // Apply camera transform
+endWorldRender(): void    // Reset transform
+```
+
+**Game Entities (game2d.ts):**
+- Player: Circle with direction indicator
+- Enemies: Colored circles with health bars
+- Projectiles: Small rectangles or circles
+- All entities have 2D position: `{ x: number, y: number, z: 0 }`
+
+**Mouse Aiming:**
+1. Get mouse screen position from event
+2. Convert to world position using `screenToWorld()`
+3. Calculate direction from player to mouse cursor
+4. Normalize direction vector
+5. Apply to projectile velocity
 
 ---
 
@@ -237,14 +321,16 @@ Crates spawn randomly in the arena containing:
 Clean futuristic training simulation:
 - **Color Palette:** Neon highlights, red/blue accents
 - **Environment:** Grid-based arena floor with holographic appearance
-- **Enemies:** Holographic drone representations
+- **Enemies:** Circular drone representations with colored glows
 - **Effects:** Bright, energetic ability visualizations
 
-### Rendering Requirements
-- All 3D assets rendered via Babylon.js
-- Particle effects for ability impacts
-- Clear visual feedback for damage/disablement
-- UI elements with neon styling
+### Rendering Requirements (2D Canvas)
+- All graphics rendered via HTML5 Canvas 2D API
+- Circles for player and enemies
+- Rectangles/shapes for projectiles
+- Canvas drawing primitives (arc, rect, line, fillText)
+- Color-based visual feedback for damage/disablement
+- Simple but clear 2D visual effects
 
 ---
 
@@ -265,10 +351,11 @@ Clean futuristic training simulation:
 - Game over screen with final score
 - Ability combination interface (drag-and-drop)
 
-### Input Methods
-- Keyboard: Movement (WASD), shooting, ability triggers
-- Mouse: Camera control, ability selection
-- UI buttons: Menu navigation, ability merging
+### Input Methods (2D Controls)
+- **Keyboard:** Movement (WASD), ability triggers (1-4 keys)
+- **Mouse:** Aiming (cursor position), shooting (click)
+- **UI buttons:** Menu navigation, ability merging
+- **Camera:** Automatically follows player in 2D space
 
 ---
 
@@ -277,15 +364,16 @@ Clean futuristic training simulation:
 ### Task Allocation
 
 **Kevin (Game Engine & Rendering)**
-- Babylon.js project setup
-- Arena scene creation
-- Player movement and camera systems
-- Basic shooting mechanics
-- Enemy rendering and spawning
-- Collision detection
-- Basic UI implementation
-- Wave visualization
-- Particle effects and visuals
+- HTML5 Canvas 2D setup and rendering system
+- Arena scene creation (2D top-down view)
+- Player movement (2D WASD controls)
+- Camera follow system (2D world space)
+- Mouse aiming and shooting mechanics (screen-to-world conversion)
+- Enemy rendering (2D circles with colors)
+- Collision detection (2D distance checks)
+- Basic UI implementation (HTML overlays)
+- Wave visualization (2D spawning)
+- Simple 2D visual effects
 - Ability merge UI
 
 **Julien (Game Systems & Data)**
@@ -419,18 +507,20 @@ Example:
 ### Decision Making
 - Feature scope decisions prioritize demo completeness
 - Technical decisions favor performance and rapid iteration
-- Trade-offs explicitly document when features are deferred
+- Trade-offs communicated verbally or in git commits (no formal docs)
 
-### Status Updates
-- Weekly sync on progress against priorities
-- Daily async updates in task management system
-- Transparent communication about blockers
+### Status Updates (Minimal Overhead)
+- Quick syncs on progress against priorities
+- Blockers communicated immediately
+- Git commits are the history
 
-### Code Standards
+### Code Standards (Hackathon Mode)
 - TypeScript strict mode enforced
 - JSON schemas validated for all game data
-- Comments required for non-obvious logic
+- Comments only for complex/non-obvious logic
 - Consistent naming conventions (camelCase for variables, PascalCase for classes)
+- **Code over comments** - Self-explanatory code preferred
+- **Working demos over documentation** - Show, don't write
 
 ---
 

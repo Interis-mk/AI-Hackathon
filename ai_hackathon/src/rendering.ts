@@ -9,11 +9,14 @@ export class SceneManager {
   public width: number
   public height: number
 
-  // Arena dimensions - much larger to feel less zoomed in
-  public arenaWidth = 1100
-  public arenaHeight = 650
-  public arenaOffsetX: number
-  public arenaOffsetY: number
+  // Arena dimensions - much larger world space
+  public arenaWidth = 16000
+  public arenaHeight = 12000
+
+  // Camera system for zooming and following player
+  public cameraX: number = 800
+  public cameraY: number = 600
+  public cameraZoom: number = 0.6 // 0.6 = zoomed out (see more), 1.0 = normal
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
@@ -23,58 +26,102 @@ export class SceneManager {
     }
     this.ctx = ctx
 
+    // Set canvas resolution to match display size
+    // This is CRITICAL for accurate mouse coordinate conversion
+    const rect = canvas.getBoundingClientRect()
+    canvas.width = rect.width
+    canvas.height = rect.height
+
     this.width = canvas.width
     this.height = canvas.height
-    this.arenaOffsetX = (this.width - this.arenaWidth) / 2
-    this.arenaOffsetY = (this.height - this.arenaHeight) / 2
 
     this.setupResizeHandler()
   }
 
+  /**
+   * Update camera to follow a position (like the player)
+   */
+  public updateCamera(targetX: number, targetY: number): void {
+    // No smoothing for perfectly accurate mouse aiming
+    this.cameraX = targetX
+    this.cameraY = targetY
+  }
+
   private setupResizeHandler(): void {
     window.addEventListener('resize', () => {
-      // Canvas size is fixed in HTML, no need to resize
+      const rect = this.canvas.getBoundingClientRect()
+      this.canvas.width = rect.width
+      this.canvas.height = rect.height
+      this.width = this.canvas.width
+      this.height = this.canvas.height
     })
   }
 
   /**
-   * Clear the canvas with dark background
+   * Clear the canvas with dark background and apply camera transform
    */
   public clear(): void {
+    // Clear entire canvas
     this.ctx.fillStyle = '#000000'
     this.ctx.fillRect(0, 0, this.width, this.height)
 
+    // Save context and apply camera transformation
+    this.ctx.save()
+    this.ctx.translate(this.width / 2, this.height / 2)
+    this.ctx.scale(this.cameraZoom, this.cameraZoom)
+    this.ctx.translate(-this.cameraX, -this.cameraY)
+
     // Draw arena background
     this.ctx.fillStyle = '#001a00'
-    this.ctx.fillRect(this.arenaOffsetX, this.arenaOffsetY, this.arenaWidth, this.arenaHeight)
+    this.ctx.fillRect(0, 0, this.arenaWidth, this.arenaHeight)
 
     // Draw arena border
     this.ctx.strokeStyle = '#00ff00'
-    this.ctx.lineWidth = 3
-    this.ctx.strokeRect(this.arenaOffsetX, this.arenaOffsetY, this.arenaWidth, this.arenaHeight)
+    this.ctx.lineWidth = 4 / this.cameraZoom // Scale line width for zoom
+    this.ctx.strokeRect(0, 0, this.arenaWidth, this.arenaHeight)
 
     // Draw grid pattern
     this.drawGrid()
+
+    // Restore context for UI elements drawn later
+    this.ctx.restore()
   }
 
   private drawGrid(): void {
-    this.ctx.strokeStyle = 'rgba(0, 255, 0, 0.1)'
-    this.ctx.lineWidth = 1
-    const gridSize = 50
+    this.ctx.strokeStyle = 'rgba(0, 255, 0, 0.15)'
+    this.ctx.lineWidth = 1 / this.cameraZoom
+    const gridSize = 100
 
-    for (let x = this.arenaOffsetX; x < this.arenaOffsetX + this.arenaWidth; x += gridSize) {
+    for (let x = 0; x <= this.arenaWidth; x += gridSize) {
       this.ctx.beginPath()
-      this.ctx.moveTo(x, this.arenaOffsetY)
-      this.ctx.lineTo(x, this.arenaOffsetY + this.arenaHeight)
+      this.ctx.moveTo(x, 0)
+      this.ctx.lineTo(x, this.arenaHeight)
       this.ctx.stroke()
     }
 
-    for (let y = this.arenaOffsetY; y < this.arenaOffsetY + this.arenaHeight; y += gridSize) {
+    for (let y = 0; y <= this.arenaHeight; y += gridSize) {
       this.ctx.beginPath()
-      this.ctx.moveTo(this.arenaOffsetX, y)
-      this.ctx.lineTo(this.arenaOffsetX + this.arenaWidth, y)
+      this.ctx.moveTo(0, y)
+      this.ctx.lineTo(this.arenaWidth, y)
       this.ctx.stroke()
     }
+  }
+
+  /**
+   * Begin drawing in world space (with camera transform)
+   */
+  public beginWorldRender(): void {
+    this.ctx.save()
+    this.ctx.translate(this.width / 2, this.height / 2)
+    this.ctx.scale(this.cameraZoom, this.cameraZoom)
+    this.ctx.translate(-this.cameraX, -this.cameraY)
+  }
+
+  /**
+   * End world space rendering
+   */
+  public endWorldRender(): void {
+    this.ctx.restore()
   }
 
   /**
@@ -87,7 +134,7 @@ export class SceneManager {
     this.ctx.fill()
 
     this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
-    this.ctx.lineWidth = lineWidth
+    this.ctx.lineWidth = lineWidth / this.cameraZoom
     this.ctx.stroke()
   }
 
@@ -102,52 +149,46 @@ export class SceneManager {
   /**
    * Draw a health bar above an entity
    */
-  public drawHealthBar(x: number, y: number, health: number, maxHealth: number, width: number = 30): void {
-    const barHeight = 4
-    const healthPercentage = Math.max(0, health / maxHealth)
+  public drawHealthBar(x: number, y: number, health: number, maxHealth: number, width: number = 40): void {
+    const barHeight = 5 / this.cameraZoom;
+    const healthPercentage = Math.max(0, health / maxHealth);
+    const offsetY = 25 / this.cameraZoom;
 
     // Background
-    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
-    this.ctx.fillRect(x - width / 2, y - 20, width, barHeight)
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.ctx.fillRect(x - width / 2, y - offsetY, width, barHeight);
 
     // Health bar
     const healthColor = healthPercentage > 0.5 ? '#00ff00' : healthPercentage > 0.25 ? '#ffff00' : '#ff0000'
-    this.ctx.fillStyle = healthColor
-    this.ctx.fillRect(x - width / 2, y - 20, width * healthPercentage, barHeight)
+    this.ctx.fillStyle = healthColor;
+    this.ctx.fillRect(x - width / 2, y - offsetY, width * healthPercentage, barHeight)
 
     // Border
     this.ctx.strokeStyle = healthColor
-    this.ctx.lineWidth = 1
-    this.ctx.strokeRect(x - width / 2, y - 20, width, barHeight)
+    this.ctx.lineWidth = 1 / this.cameraZoom
+    this.ctx.strokeRect(x - width / 2, y - offsetY, width, barHeight)
   }
 
   /**
    * Draw text
    */
   public drawText(text: string, x: number, y: number, color: string = '#fff', fontSize: number = 14): void {
-    this.ctx.fillStyle = color
-    this.ctx.font = `${fontSize}px Arial`
-    this.ctx.textAlign = 'center'
+    this.ctx.fillStyle = color;
+    this.ctx.font = `${fontSize / this.cameraZoom}px Arial`;
+    this.ctx.textAlign = 'center';
     this.ctx.fillText(text, x, y)
   }
 
   /**
-   * Convert world coordinates to screen coordinates
-   */
-  public worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
-    return {
-      x: this.arenaOffsetX + worldX,
-      y: this.arenaOffsetY + worldY,
-    }
-  }
-
-  /**
-   * Convert screen coordinates to world coordinates
+   * Convert screen coordinates to world coordinates (for mouse input)
    */
   public screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+    const centerX = this.width / 2
+    const centerY = this.height / 2
+
     return {
-      x: screenX - this.arenaOffsetX,
-      y: screenY - this.arenaOffsetY,
+      x: (screenX - centerX) / this.cameraZoom + this.cameraX,
+      y: (screenY - centerY) / this.cameraZoom + this.cameraY,
     }
   }
 
