@@ -229,51 +229,6 @@ Crates may contain:
 * Passive upgrades
 * Temporary buffs
 * AI-generated powers
-
----
-
-# AI Systems
-
-AI plays an active role in generating gameplay elements.
-
----
-
-## ChatGPT Responsibilities
-
-* Generate new abilities
-* Balance ability stats
-* Create ability combinations
-
----
-
-## Gemini Responsibilities
-
-* Generate enemy mutations
-* Modify wave behavior
-* Create difficulty modifiers
-
-Example:
-
-```
-Mutation: Magnetic
-Drones are pulled toward each other periodically.
-```
-
----
-
-## Claude Responsibilities
-
-* Generate flavor text
-* Describe events
-* Provide narrative context
-
-Example:
-
-```
-Simulation Warning:
-Experimental combat drones have entered the arena.
-```
-
 ---
 
 # Visual Style
