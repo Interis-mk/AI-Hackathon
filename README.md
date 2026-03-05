@@ -1,191 +1,160 @@
-# AI Hackathon Project — AI-Driven Wave Shooter
+# AI Arena — AI-Driven Wave Shooter
 
-## Overview
+### Hackathon Project for Open Day
 
-This project is a **web-based wave shooter** inspired by **DOOM** and the **Warhammer 40K universe**. The game will be built using **TypeScript** and **Babylon.js**, and will integrate multiple AI systems (**ChatGPT, Gemini, and Claude**) to dynamically generate gameplay elements such as abilities, upgrades, enemy mutations, and event modifiers.
+---
 
-The core idea is to create a **fast-paced arena shooter** where the player survives increasingly difficult waves of enemies while building and combining abilities that are **generated or enhanced using AI**.
+# Overview
+
+**AI Arena** is a fast-paced **web-based arena shooter** where players test experimental AI-generated combat abilities in a futuristic training simulation.
+
+Instead of a brutal battlefield, the game takes place inside a **high-tech combat simulator** where the player must disable waves of malfunctioning drones while experimenting with abilities created by AI.
+
+The core idea of the project is to demonstrate how **multiple AI systems (ChatGPT, Gemini, Claude)** can dynamically create gameplay elements such as:
+
+* New abilities
+* Ability combinations
+* Enemy mutations
+* Event descriptions
+
+The result is a **playable demo where AI actively shapes the game experience**.
+
+The project is built using **TypeScript** and **Babylon.js**.
+
+---
+
+# Inspiration
+
+Gameplay inspiration:
+
+* DOOM (fast arena combat loop)
+* Arcade wave shooters
+
+Visual inspiration:
+
+* Futuristic training simulations
+* Neon sci-fi arenas
+* Holographic environments
+
+Instead of violent combat, enemies are **malfunctioning drones** that must be **disabled**.
 
 ---
 
 # Core Concept
 
-A **top-down or arena-style shooter** where the player controls a heavily armed **Space Marine-style character** fighting waves of **robotic or corrupted enemies**.
+Players enter a **combat simulation arena** where waves of drones spawn.
 
-Key features:
+The player survives as long as possible while collecting **AI-generated abilities** and combining them into powerful new skills.
 
-* Procedurally escalating **wave combat**
-* **AI-generated abilities and modifiers**
-* **Ability merging system**
-* **Dynamic enemy mutations**
-* **Persistent upgrade systems**
-* **Dark sci-fi aesthetic inspired by Warhammer 40K**
+Each run is slightly different because **AI dynamically generates upgrades and modifiers**.
 
 ---
 
 # Tech Stack
 
-## Frontend
+## Core Technology
 
 * **TypeScript**
-* **Babylon.js** (3D rendering and game engine)
-* **Vite** (fast dev server and bundling)
+* **Babylon.js**
+* **Vite**
 
-## AI Integration
+## AI Systems
 
-The project integrates **three AI systems**, each responsible for different tasks:
+| AI      | Role                               |
+| ------- | ---------------------------------- |
+| ChatGPT | Ability generation and balancing   |
+| Gemini  | Enemy mutations and wave modifiers |
+| Claude  | Event descriptions and lore flavor |
 
-| AI      | Role                                           |
-| ------- | ---------------------------------------------- |
-| ChatGPT | Ability generation and balancing               |
-| Gemini  | Enemy mutation and behavior modifiers          |
-| Claude  | Narrative flavor, event descriptions, and lore |
+## Data Format
 
-## Other Tools
-
-* Git / GitHub (collaboration)
-* JSON for ability definitions
-* REST or API wrappers for AI calls
-
----
-
-# Game Design
-
-## Player Fantasy
-
-The player embodies a **super-soldier inspired by Space Marines**, equipped with futuristic weapons and experimental abilities.
-
-Combat should feel:
-
-* Fast
-* Brutal
-* Chaotic
-* Satisfying
-
-Influences:
-
-* **DOOM** (aggressive combat loop)
-* **Warhammer 40K** (grimdark sci-fi aesthetic)
+Game data such as abilities are stored as **JSON objects**.
 
 ---
 
 # Gameplay Loop
 
 1. Player enters arena
-2. Enemies spawn in waves
-3. Player defeats enemies to gain **XP**
-4. Player levels up and receives **abilities or upgrades**
-5. Abilities can be **merged**
-6. AI generates **new combined abilities**
-7. Difficulty increases
-8. Elite enemies and events appear
-9. Repeat until defeat
+2. Drones spawn in waves
+3. Player disables drones to gain **XP**
+4. Player levels up and receives **abilities**
+5. Abilities can be **combined**
+6. AI generates **new abilities**
+7. Waves become harder
+8. Repeat until defeat
 
----
-
-# Wave System
-
-Waves increase difficulty through:
-
-* Increased spawn counts
-* New enemy types
-* Elite enemies
-* Environmental hazards
-* AI-generated modifiers
-
-Example wave escalation:
-
-```
-Wave 1–3   : Basic enemies
-Wave 4–6   : Fast enemies
-Wave 7–9   : Elite units
-Wave 10+   : Boss encounters
-```
-
-Spawn types:
-
-* Incremental spawning
-* Burst spawning
-* AI-modified waves
+Each run lasts roughly **2–5 minutes**, making it perfect for an **open day demo**.
 
 ---
 
 # Enemy Types
 
-## Basic Enemies
+## Basic Drones
 
-* Melee drones
-* Ranged drones
-* Swarm bots
-
-## Elite Enemies
-
-Elites appear occasionally with special modifiers:
+Standard enemies that move toward the player.
 
 Examples:
 
-* Shielded
-* Explosive
-* Teleporting
-* Regenerating
+* Scout Drone
+* Pulse Drone
+* Swarm Drone
 
-AI may generate new enemy traits dynamically.
+## Elite Drones
 
-Example:
+Stronger variants with modifiers.
+
+Examples:
+
+* Shield Drone
+* Phase Drone
+* Overclocked Drone
+* Regenerating Drone
+
+AI may dynamically generate new modifiers.
+
+Example mutation:
 
 ```
-Radiation Drone
-- Emits toxic aura
-- Slowly damages player over time
+Mutation: Frenzied
+Drones move faster but have reduced durability.
 ```
 
 ---
 
 # Player Progression
 
-## XP System
+Players gain **XP** by disabling drones.
 
-Players gain XP by:
+Leveling up grants:
 
-* Killing enemies
-* Completing waves
-* Surviving elite encounters
-
-Leveling up unlocks:
-
-* Abilities
+* New abilities
 * Passive upgrades
-* Weapon modifiers
+* Ability combinations
 
 ---
 
 # Ability System
 
-Abilities are the **core mechanic** of the game.
-
-Players obtain abilities through leveling and crates.
-
-Abilities fall into two main categories.
+Abilities are divided into two categories.
 
 ---
 
 ## Passive Abilities
 
-Permanent stat modifiers.
+Permanent stat boosts.
 
 Examples:
 
-* Increased HP
-* Increased damage
-* Increased fire rate
-* Faster reload
-* Increased bullet speed
-* XP gain bonus
+* Increased energy (HP)
+* Faster fire rate
+* Increased projectile speed
+* XP boost
+* Faster cooldowns
 
 Example:
 
 ```
-Relentless Fire
+Overclock
 +15% fire rate
 +10% reload speed
 ```
@@ -198,17 +167,17 @@ Triggered abilities with cooldowns.
 
 Examples:
 
-* Energy aura
-* Tactical grenade
-* Orbital strike
-* Shockwave
-* Defensive shield
+* Energy Pulse
+* Gravity Field
+* Drone EMP
+* Plasma Burst
+* Energy Shield
 
 Example:
 
 ```
 Shock Pulse
-Releases an electrical wave that stuns enemies.
+Releases an electrical wave that disables nearby drones.
 Cooldown: 12 seconds
 ```
 
@@ -216,65 +185,37 @@ Cooldown: 12 seconds
 
 # Ability Combination System
 
-One of the core experimental mechanics.
+Players can **merge abilities** to create new ones.
 
-Players can **merge abilities** using a **drag-and-drop interface**.
-
-Example:
+Example combinations:
 
 ```
-Fire + Poison → Toxic Flame
-Frost + Electric → Cryo Shock
-Grenade + Radiation → Nuclear Burst
+Fire + Frost → Steam Burst
+Electric + Gravity → Tesla Vortex
+Shield + Aura → Energy Dome
 ```
 
 Rules:
 
-* Max **4 merge cycles**
-* Each merge generates a new ability
-* AI determines stats and effects
+* Maximum **4 merge cycles**
+* AI determines new stats and effects
+* New abilities are generated in **JSON format**
 
----
-
-# Ability Data Format
-
-Abilities are stored as JSON.
-
-Example:
+Example ability JSON:
 
 ```json
 {
-  "name": "Toxic Flame",
+  "name": "Tesla Vortex",
   "type": "active",
   "damage": 35,
   "effects": [
-    "burn",
-    "poison"
+    "electric",
+    "gravity"
   ],
   "cooldown": 8,
-  "description": "A burst of toxic fire that burns and poisons enemies."
+  "description": "A vortex of electricity that pulls drones inward."
 }
 ```
-
-AI can generate new ability definitions in this format.
-
----
-
-# Element System
-
-Abilities can include elemental effects.
-
-Supported elements:
-
-* Fire (burn)
-* Frost (slow/freeze)
-* Electric (chain damage)
-* Poison (damage over time)
-* Radiation (area damage)
-* Bleed (stacking damage)
-* Holy / Purge (anti-elite bonus)
-
-Elements can combine to create **unique effects**.
 
 ---
 
@@ -284,76 +225,70 @@ Occasionally crates spawn in the arena.
 
 Crates may contain:
 
-* Weapons
-* Ability upgrades
+* New abilities
+* Passive upgrades
 * Temporary buffs
-* Random AI-generated powers
+* AI-generated powers
 
 ---
 
 # AI Systems
 
-AI is used to dynamically generate gameplay elements.
+AI plays an active role in generating gameplay elements.
 
 ---
 
-## ChatGPT Role
+## ChatGPT Responsibilities
 
-Responsible for:
-
-* Generating new abilities
-* Balancing stats
-* Creating ability combinations
-* Suggesting upgrade paths
+* Generate new abilities
+* Balance ability stats
+* Create ability combinations
 
 ---
 
-## Gemini Role
+## Gemini Responsibilities
 
-Responsible for:
-
-* Enemy mutations
-* Wave modifiers
-* Difficulty scaling
+* Generate enemy mutations
+* Modify wave behavior
+* Create difficulty modifiers
 
 Example:
 
 ```
-Mutation: Frenzied
-Enemies move 40% faster but have reduced health.
+Mutation: Magnetic
+Drones are pulled toward each other periodically.
 ```
 
 ---
 
-## Claude Role
+## Claude Responsibilities
 
-Responsible for:
-
-* Lore snippets
-* Event descriptions
-* Flavor text
+* Generate flavor text
+* Describe events
+* Provide narrative context
 
 Example:
 
 ```
-The Machine Cult has awakened ancient war constructs.
-Prepare for annihilation.
+Simulation Warning:
+Experimental combat drones have entered the arena.
 ```
 
 ---
 
 # Visual Style
 
-Inspired by **Warhammer 40K grimdark sci-fi**.
+The game uses a **clean futuristic training simulation aesthetic**.
 
 Characteristics:
 
-* Dark metallic environments
-* Red UI accents
-* Neon weapon effects
-* Heavy industrial atmosphere
+* Neon highlights
+* Holographic drones
+* Grid-based arena floor
+* Bright ability effects
+* Red and blue UI accents
 
-Rendering handled with **Babylon.js**.
+Rendering is handled using **Babylon.js**.
 
 ---
 
@@ -388,19 +323,6 @@ project-root
 
 ---
 
-# Possible Stretch Goals
-
-If time allows during the hackathon:
-
-* Procedural arenas
-* Boss enemies
-* Co-op multiplayer
-* Weapon crafting
-* AI-generated missions
-* Replay system
-
----
-
 # Development Setup
 
 Install dependencies:
@@ -425,35 +347,159 @@ npm run build
 
 # Hackathon Goal
 
-Build a **playable prototype** that demonstrates:
+Deliver a **playable demo** where visitors can:
 
-* Wave-based combat
-* Ability merging
-* AI-generated gameplay elements
-* Babylon.js rendering
+* Play a short arena session
+* See AI generate new abilities
+* Watch enemies mutate
+* Experiment with ability combinations
 
-The focus is experimentation with **AI-driven game mechanics** rather than building a full production game.
+The focus is demonstrating **AI-driven game design**.
 
 ---
 
-# Team Workflow
+# Development Tasks
 
-* Use **GitHub for version control**
-* Feature branches for new mechanics
-* AI prompts stored in `/ai/prompts`
+Tasks are split between **Kevin** and **Julien** and ordered by **priority**.
+
+---
+
+# Priority 1 — Core Playable Game
+
+## Kevin
+
+Focus: **Game Engine & Rendering**
+
+Tasks:
+
+* Setup **Babylon.js project**
+* Create **arena scene**
+* Implement **player movement**
+* Implement **camera system**
+* Implement **basic shooting**
+* Create **simple drone enemy**
+* Implement **enemy spawning**
+* Implement **collision detection**
+* Implement **basic UI (HP / score)**
+
+Goal:
+A playable prototype where the player can move and shoot drones.
+
+---
+
+## Julien
+
+Focus: **Game Systems & Data**
+
+Tasks:
+
+* Define **ability JSON format**
+* Implement **XP system**
+* Implement **level-up system**
+* Implement **basic ability system**
+* Implement **passive ability effects**
+* Implement **active ability triggers**
+
+Goal:
+Player can gain abilities when leveling up.
+
+---
+
+# Priority 2 — Wave System
+
+## Kevin
+
+* Implement **wave spawning system**
+* Add **multiple enemy types**
+* Add **enemy movement behaviors**
+* Add **enemy visual effects**
+
+---
+
+## Julien
+
+* Implement **difficulty scaling**
+* Implement **elite enemy modifiers**
+* Implement **crate spawning**
+* Implement **temporary buffs**
+
+---
+
+# Priority 3 — Ability Combination System
+
+## Kevin
+
+* Implement **ability merge UI**
+* Drag-and-drop ability interface
+* Visual effect for ability creation
+
+---
+
+## Julien
+
+* Implement **ability merge logic**
+* Generate combined ability JSON
+* Apply merged ability effects
+
+---
+
+# Priority 4 — AI Integration
+
+## Kevin
+
+* Add UI to display **AI-generated abilities**
+* Visual indicators for AI events
+
+---
+
+## Julien
+
+* Integrate APIs for:
+
+  * ChatGPT
+  * Gemini
+  * Claude
+
+* Implement AI prompts for:
+
+  * Ability generation
+  * Enemy mutation
+  * Event descriptions
+
+---
+
+# Priority 5 — Polish for Open Day
+
+## Kevin
+
+* Add particle effects
+* Improve UI
+* Add sound effects
+* Improve visuals
+
+---
+
+## Julien
+
+* Add leaderboard
+* Add session timer
+* Improve ability balancing
+* Add fun AI-generated messages
+
+---
+
+# Stretch Goals (If Time Allows)
+
+* Boss drone
+* Procedural arena
+* More ability combinations
+* Replay system
+* Multiplayer prototype
 
 ---
 
 # Final Vision
 
-A chaotic arena shooter where:
+A fun **AI-powered arena shooter demo** where visitors can quickly jump in and experience how **AI dynamically changes gameplay**.
 
-* Players create absurd ability combinations
-* Enemies mutate unpredictably
-* AI constantly introduces new mechanics
-
-Every run becomes **unique, chaotic, and brutal**.
-
-In the spirit of:
-
-**"Rip and tear — but with AI."**
+Every run creates new abilities, new enemies, and unexpected combinations — making each playthrough unique.
