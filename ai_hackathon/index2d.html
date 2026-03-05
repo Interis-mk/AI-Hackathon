@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Arena - AI-Driven Wave Shooter</title>
+    <title>AI Arena - AI-Driven Wave Shooter (2D)</title>
     <style>
       * {
         margin: 0;
@@ -18,21 +18,27 @@
         background: #000;
         font-family: 'Arial', sans-serif;
         color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       #canvas {
-        width: 100%;
-        height: 100%;
+        border: 3px solid #00ff00;
+        box-shadow: 0 0 20px #00ff00;
         display: block;
+        background: #000;
       }
 
       #ui {
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         pointer-events: none;
+        width: 100%;
+        height: 100%;
       }
 
       .hud {
@@ -119,43 +125,6 @@
         font-weight: bold;
       }
 
-      /* Center Crosshair */
-      .crosshair {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 30px;
-        height: 30px;
-        border: 2px solid #00ff00;
-        border-radius: 50%;
-        z-index: 100;
-        box-shadow: 0 0 5px #00ff00;
-      }
-
-      .crosshair::before,
-      .crosshair::after {
-        content: '';
-        position: absolute;
-        background: #00ff00;
-      }
-
-      .crosshair::before {
-        width: 2px;
-        height: 10px;
-        left: 50%;
-        top: -12px;
-        transform: translateX(-50%);
-      }
-
-      .crosshair::after {
-        width: 10px;
-        height: 2px;
-        left: -12px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-
       /* Hotbar */
       .hotbar {
         position: absolute;
@@ -168,6 +137,7 @@
         padding: 15px;
         border: 2px solid #00ff00;
         border-radius: 8px;
+        pointer-events: none;
       }
 
       .ability-slot {
@@ -177,34 +147,12 @@
         border: 2px solid #ff00ff;
         border-radius: 4px;
         position: relative;
-        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 12px;
         font-weight: bold;
         color: #ff00ff;
-      }
-
-      .ability-slot:hover {
-        box-shadow: 0 0 10px #ff00ff;
-      }
-
-      .ability-slot.cooldown::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: conic-gradient(#ff0000, transparent);
-        border-radius: 4px;
-        opacity: 0.5;
-      }
-
-      .ability-slot-label {
-        position: absolute;
-        bottom: -20px;
-        font-size: 11px;
-        color: #fff;
-        white-space: nowrap;
       }
 
       /* Notifications */
@@ -254,7 +202,7 @@
 
       /* Menu Styles */
       #menu {
-        position: absolute;
+        position: fixed;
         inset: 0;
         background: linear-gradient(135deg, #001a4d 0%, #000033 100%);
         display: flex;
@@ -290,6 +238,7 @@
         cursor: pointer;
         font-weight: bold;
         transition: all 0.3s;
+        pointer-events: auto;
       }
 
       #menu button:hover {
@@ -299,7 +248,7 @@
 
       /* Game Over Screen */
       #game-over {
-        position: absolute;
+        position: fixed;
         inset: 0;
         background: rgba(0, 0, 0, 0.95);
         display: none;
@@ -310,7 +259,6 @@
         color: #ff00ff;
         text-align: center;
         pointer-events: auto;
-      }
       }
 
       #game-over h2 {
@@ -343,6 +291,7 @@
         cursor: pointer;
         font-weight: bold;
         transition: all 0.3s;
+        pointer-events: auto;
       }
 
       #game-over button:hover {
@@ -352,11 +301,11 @@
     </style>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" width="1200" height="700"></canvas>
     <div id="ui">
       <div id="menu">
         <h1>AI Arena</h1>
-        <p>AI-Driven Wave Shooter</p>
+        <p>AI-Driven Wave Shooter (2D)</p>
         <p>Disable waves of malfunctioning drones while experimenting with AI-generated abilities.</p>
         <button onclick="window.game?.startGame()">Start Game</button>
       </div>
@@ -398,8 +347,6 @@
           Wave: <span id="wave">1</span>
         </div>
       </div>
-
-      <div class="crosshair"></div>
 
       <div class="hotbar">
         <div class="ability-slot" data-slot="1">Slot 1</div>

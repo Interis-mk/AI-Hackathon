@@ -1,12 +1,13 @@
 {
   "name": "ai-hackathon",
   "version": "1.0.0",
-  "description": "AI Arena - AI-Driven Wave Shooter",
+  "description": "AI Arena - AI-Driven Wave Shooter (2D)",
   "keywords": [
     "ai",
     "game",
-    "babylon.js",
-    "typescript"
+    "2d",
+    "typescript",
+    "canvas"
   ],
   "homepage": "https://github.com/Interis-mk/AI-Hackathon/tree/main#readme",
   "bugs": {
@@ -21,14 +22,12 @@
   "type": "module",
   "main": "src/main.ts",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "babylonjs": "^6.0.0",
-    "babylonjs-loaders": "^6.0.0",
     "axios": "^1.6.0"
   },
   "devDependencies": {

@@ -1,246 +1,179 @@
 /**
- * Babylon.js Scene Management
- * Handles rendering, camera, lighting, and 3D objects
+ * 2D Canvas Rendering
+ * Handles all 2D game rendering using HTML5 Canvas
  */
 
-import * as BABYLON from 'babylonjs'
-
 export class SceneManager {
-  public engine: BABYLON.Engine
-  public scene: BABYLON.Scene
   public canvas: HTMLCanvasElement
+  public ctx: CanvasRenderingContext2D
+  public width: number
+  public height: number
+
+  // Arena dimensions
+  public arenaWidth = 800
+  public arenaHeight = 600
+  public arenaOffsetX: number
+  public arenaOffsetY: number
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas
-    this.engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true })
-    this.scene = new BABYLON.Scene(this.engine)
-
-    this.initializeScene()
-    this.setupResizeHandler()
-  }
-
-  private initializeScene(): void {
-    // Set clear color (dark space background)
-    this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 1)
-
-    // Setup lighting
-    this.setupLighting()
-
-    // Setup arena
-    this.createArena()
-
-    // Setup camera
-    this.setupCamera()
-
-    // Enable physics if needed
-    this.scene.enablePhysics()
-  }
-
-  private setupLighting(): void {
-    // Ambient light
-    const ambientLight = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), this.scene)
-    ambientLight.intensity = 0.6
-    ambientLight.specular = new BABYLON.Color3(0, 0, 0)
-
-    // Main directional light
-    const dirLight = new BABYLON.PointLight('dirLight', new BABYLON.Vector3(0, 50, 0), this.scene)
-    dirLight.intensity = 0.8
-    dirLight.range = 200
-
-    // Neon glow lights
-    const redLight = new BABYLON.PointLight('redLight', new BABYLON.Vector3(-40, 20, 40), this.scene)
-    redLight.diffuse = new BABYLON.Color3(1, 0, 0)
-    redLight.intensity = 0.3
-    redLight.range = 100
-
-    const blueLight = new BABYLON.PointLight('blueLight', new BABYLON.Vector3(40, 20, -40), this.scene)
-    blueLight.diffuse = new BABYLON.Color3(0, 0, 1)
-    blueLight.intensity = 0.3
-    blueLight.range = 100
-  }
-
-  private createArena(): void {
-    // Arena floor (grid pattern)
-    const floorMaterial = new BABYLON.StandardMaterial('floorMat', this.scene)
-    floorMaterial.emissiveColor = new BABYLON.Color3(0, 0.5, 0)
-    floorMaterial.backFaceCulling = false
-
-    const floor = BABYLON.MeshBuilder.CreateGround('floor', { width: 100, height: 100 }, this.scene)
-    floor.material = floorMaterial
-    floor.position.y = 0
-
-    // Arena walls
-    const wallMaterial = new BABYLON.StandardMaterial('wallMat', this.scene)
-    wallMaterial.emissiveColor = new BABYLON.Color3(0, 0.3, 0.5)
-    wallMaterial.backFaceCulling = false
-
-    const wallThickness = 2
-    const wallHeight = 30
-    const arenaSize = 100
-
-    // North wall
-    const wallNorth = BABYLON.MeshBuilder.CreateBox(
-      'wallNorth',
-      { width: arenaSize, height: wallHeight, depth: wallThickness },
-      this.scene
-    )
-    wallNorth.position = new BABYLON.Vector3(0, wallHeight / 2, -arenaSize / 2)
-    wallNorth.material = wallMaterial
-
-    // South wall
-    const wallSouth = BABYLON.MeshBuilder.CreateBox(
-      'wallSouth',
-      { width: arenaSize, height: wallHeight, depth: wallThickness },
-      this.scene
-    )
-    wallSouth.position = new BABYLON.Vector3(0, wallHeight / 2, arenaSize / 2)
-    wallSouth.material = wallMaterial
-
-    // East wall
-    const wallEast = BABYLON.MeshBuilder.CreateBox(
-      'wallEast',
-      { width: wallThickness, height: wallHeight, depth: arenaSize },
-      this.scene
-    )
-    wallEast.position = new BABYLON.Vector3(arenaSize / 2, wallHeight / 2, 0)
-    wallEast.material = wallMaterial
-
-    // West wall
-    const wallWest = BABYLON.MeshBuilder.CreateBox(
-      'wallWest',
-      { width: wallThickness, height: wallHeight, depth: arenaSize },
-      this.scene
-    )
-    wallWest.position = new BABYLON.Vector3(-arenaSize / 2, wallHeight / 2, 0)
-    wallWest.material = wallMaterial
-
-    // Store arena bounds for collision
-    ;(this.scene as any).arenaBounds = {
-      minX: -arenaSize / 2 + wallThickness,
-      maxX: arenaSize / 2 - wallThickness,
-      minZ: -arenaSize / 2 + wallThickness,
-      maxZ: arenaSize / 2 - wallThickness,
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('Failed to get 2D context from canvas')
     }
-  }
+    this.ctx = ctx
 
-  private setupCamera(): void {
-    const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 5, 0), this.scene)
-    camera.attachControl(this.canvas, true)
-    camera.speed = 0
-    camera.inertia = 0
-    camera.angularSensibility = 1000
-    camera.minZ = 0.1
-    camera.fov = 1.2
+    this.width = canvas.width
+    this.height = canvas.height
+    this.arenaOffsetX = (this.width - this.arenaWidth) / 2
+    this.arenaOffsetY = (this.height - this.arenaHeight) / 2
+
+    this.setupResizeHandler()
   }
 
   private setupResizeHandler(): void {
     window.addEventListener('resize', () => {
-      this.engine.resize()
+      // Canvas size is fixed in HTML, no need to resize
     })
   }
 
   /**
-   * Create a player mesh (capsule shape)
+   * Clear the canvas with dark background
    */
-  public createPlayerMesh(position: { x: number; y: number; z: number }): BABYLON.Mesh {
-    const material = new BABYLON.StandardMaterial('playerMat', this.scene)
-    material.emissiveColor = new BABYLON.Color3(0, 1, 0)
+  public clear(): void {
+    this.ctx.fillStyle = '#000000'
+    this.ctx.fillRect(0, 0, this.width, this.height)
 
-    // Create a capsule (cylinder + spheres)
-    const cylinder = BABYLON.MeshBuilder.CreateCylinder('playerBody', { height: 3, diameter: 1 }, this.scene)
-    const sphere = BABYLON.MeshBuilder.CreateSphere('playerHead', { diameter: 1 }, this.scene)
-    sphere.position.y = 1.8
+    // Draw arena background
+    this.ctx.fillStyle = '#001a00'
+    this.ctx.fillRect(this.arenaOffsetX, this.arenaOffsetY, this.arenaWidth, this.arenaHeight)
 
-    const player = BABYLON.Mesh.CreateBox('player', 1, this.scene)
-    cylinder.parent = player
-    sphere.parent = player
+    // Draw arena border
+    this.ctx.strokeStyle = '#00ff00'
+    this.ctx.lineWidth = 3
+    this.ctx.strokeRect(this.arenaOffsetX, this.arenaOffsetY, this.arenaWidth, this.arenaHeight)
 
-    player.material = material
-    player.position = new BABYLON.Vector3(position.x, position.y, position.z)
+    // Draw grid pattern
+    this.drawGrid()
+  }
 
-    return player
+  private drawGrid(): void {
+    this.ctx.strokeStyle = 'rgba(0, 255, 0, 0.1)'
+    this.ctx.lineWidth = 1
+    const gridSize = 50
+
+    for (let x = this.arenaOffsetX; x < this.arenaOffsetX + this.arenaWidth; x += gridSize) {
+      this.ctx.beginPath()
+      this.ctx.moveTo(x, this.arenaOffsetY)
+      this.ctx.lineTo(x, this.arenaOffsetY + this.arenaHeight)
+      this.ctx.stroke()
+    }
+
+    for (let y = this.arenaOffsetY; y < this.arenaOffsetY + this.arenaHeight; y += gridSize) {
+      this.ctx.beginPath()
+      this.ctx.moveTo(this.arenaOffsetX, y)
+      this.ctx.lineTo(this.arenaOffsetX + this.arenaWidth, y)
+      this.ctx.stroke()
+    }
   }
 
   /**
-   * Create an enemy mesh (sphere with color)
+   * Draw a circle (used for player and enemies)
    */
-  public createEnemyMesh(
-    position: { x: number; y: number; z: number },
-    color: string,
-    scale: number = 1
-  ): BABYLON.Mesh {
-    const enemy = BABYLON.MeshBuilder.CreateSphere('enemy', { diameter: 1.5 }, this.scene)
+  public drawCircle(x: number, y: number, radius: number, color: string, lineWidth: number = 2): void {
+    this.ctx.fillStyle = color
+    this.ctx.beginPath()
+    this.ctx.arc(x, y, radius, 0, Math.PI * 2)
+    this.ctx.fill()
 
-    const material = new BABYLON.StandardMaterial('enemyMat_' + Math.random(), this.scene)
-    material.emissiveColor = BABYLON.Color3.FromHexString(color)
-
-    enemy.material = material
-    enemy.position = new BABYLON.Vector3(position.x, position.y, position.z)
-    enemy.scaling = new BABYLON.Vector3(scale, scale, scale)
-
-    return enemy
+    this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
+    this.ctx.lineWidth = lineWidth
+    this.ctx.stroke()
   }
 
   /**
-   * Create a projectile mesh (small sphere)
+   * Draw a rectangle (used for projectiles)
    */
-  public createProjectileMesh(
-    position: { x: number; y: number; z: number }
-  ): BABYLON.Mesh {
-    const projectile = BABYLON.MeshBuilder.CreateSphere('projectile', { diameter: 0.5 }, this.scene)
-
-    const material = new BABYLON.StandardMaterial('projectileMat_' + Math.random(), this.scene)
-    material.emissiveColor = new BABYLON.Color3(1, 1, 0)
-
-    projectile.material = material
-    projectile.position = new BABYLON.Vector3(position.x, position.y, position.z)
-
-    return projectile
+  public drawRect(x: number, y: number, width: number, height: number, color: string): void {
+    this.ctx.fillStyle = color
+    this.ctx.fillRect(x - width / 2, y - height / 2, width, height)
   }
 
   /**
-   * Create a health bar GUI above an object
+   * Draw a health bar above an entity
    */
-  public createHealthBar(owner: BABYLON.Mesh, health: number, maxHealth: number): BABYLON.GUI.TextBlock {
-    const advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI('UI')
+  public drawHealthBar(x: number, y: number, health: number, maxHealth: number, width: number = 30): void {
+    const barHeight = 4
+    const healthPercentage = Math.max(0, health / maxHealth)
 
-    const healthBar = new BABYLON.GUI.TextBlock()
-    healthBar.text = `${Math.round(health)}/${maxHealth}`
-    healthBar.color = 'white'
-    healthBar.fontSize = 12
-    healthBar.linkOffsetYInPixels = -100
+    // Background
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+    this.ctx.fillRect(x - width / 2, y - 20, width, barHeight)
 
-    advancedTexture.addControl(healthBar)
+    // Health bar
+    const healthColor = healthPercentage > 0.5 ? '#00ff00' : healthPercentage > 0.25 ? '#ffff00' : '#ff0000'
+    this.ctx.fillStyle = healthColor
+    this.ctx.fillRect(x - width / 2, y - 20, width * healthPercentage, barHeight)
 
-    // Link to world position (will update each frame)
-    ;(healthBar as any).linkedMesh = owner
-
-    return healthBar
+    // Border
+    this.ctx.strokeStyle = healthColor
+    this.ctx.lineWidth = 1
+    this.ctx.strokeRect(x - width / 2, y - 20, width, barHeight)
   }
 
   /**
-   * Update health bar position (called each frame)
+   * Draw text
    */
-  public updateHealthBars(): void {
-    // This will be called from the game loop
+  public drawText(text: string, x: number, y: number, color: string = '#fff', fontSize: number = 14): void {
+    this.ctx.fillStyle = color
+    this.ctx.font = `${fontSize}px Arial`
+    this.ctx.textAlign = 'center'
+    this.ctx.fillText(text, x, y)
   }
 
   /**
-   * Run render loop
+   * Convert world coordinates to screen coordinates
+   */
+  public worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
+    return {
+      x: this.arenaOffsetX + worldX,
+      y: this.arenaOffsetY + worldY,
+    }
+  }
+
+  /**
+   * Convert screen coordinates to world coordinates
+   */
+  public screenToWorld(screenX: number, screenY: number): { x: number; y: number } {
+    return {
+      x: screenX - this.arenaOffsetX,
+      y: screenY - this.arenaOffsetY,
+    }
+  }
+
+  /**
+   * Check if world coordinates are in bounds
+   */
+  public isInBounds(x: number, y: number): boolean {
+    return x >= 0 && x <= this.arenaWidth && y >= 0 && y <= this.arenaHeight
+  }
+
+  /**
+   * Run the render loop
    */
   public render(callback: () => void): void {
-    this.engine.runRenderLoop(() => {
+    const loop = () => {
       callback()
-      this.scene.render()
-    })
+      requestAnimationFrame(loop)
+    }
+    requestAnimationFrame(loop)
   }
 
   /**
-   * Dispose of resources
+   * Dispose of resources (no-op for canvas)
    */
   public dispose(): void {
-    this.scene.dispose()
-    this.engine.dispose()
+    // Canvas doesn't need cleanup
   }
 }
 
