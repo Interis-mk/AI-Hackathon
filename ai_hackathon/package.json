@@ -1,0 +1,26 @@
+{
+  "name": "ai-hackathon",
+  "version": "1.0.0",
+  "description": "hackathon from 0 to prototype with ai in 4 hours",
+  "keywords": [
+    "ai"
+  ],
+  "homepage": "https://github.com/Interis-mk/AI-Hackathon/tree/main#readme",
+  "bugs": {
+    "url": "https://github.com/Interis-mk/AI-Hackathon/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Interis-mk/AI-Hackathon.git#main"
+  },
+  "license": "MIT",
+  "author": "xrai",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "dependencies": {
+    "babylonjs": "^8.54.0"
+  }
+}
