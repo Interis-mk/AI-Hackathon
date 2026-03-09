@@ -62,9 +62,7 @@ Each run is slightly different because **AI dynamically generates upgrades and m
 
 | AI      | Role                               |
 | ------- | ---------------------------------- |
-| ChatGPT | Ability generation and balancing   |
-| Gemini  | Enemy mutations and wave modifiers |
-| Claude  | Event descriptions and lore flavor |
+| ChatGPT | Ability generation and balancing  Enemy mutations and wave modifiers   |
 
 ## Data Format
 
